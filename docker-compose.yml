@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: signal-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tech_news
+      POSTGRES_USER: signal
+      POSTGRES_PASSWORD: signal
+    ports:
+      - "5433:5432"
+    volumes:
+      - signal_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U signal -d tech_news"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  signal_postgres_data:
