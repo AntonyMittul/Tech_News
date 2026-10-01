@@ -1,7 +1,7 @@
 import { desc, eq, ne } from "drizzle-orm";
 
 import { db } from "@/db";
-import { articles, categories, sources } from "@/db/schema";
+import { articleSummaries, articles, categories, sources } from "@/db/schema";
 
 export async function getLatestArticles(limit = 20) {
   return db
@@ -15,10 +15,14 @@ export async function getLatestArticles(limit = 20) {
       author: articles.author,
       imageUrl: articles.imageUrl,
       description: articles.description,
+      summary: articleSummaries.summary,
+      keyPoints: articleSummaries.keyPoints,
+      whyItMatters: articleSummaries.whyItMatters,
       status: articles.status,
     })
     .from(articles)
     .innerJoin(sources, eq(articles.sourceId, sources.id))
+    .leftJoin(articleSummaries, eq(articleSummaries.articleId, articles.id))
     .where(ne(articles.status, "hidden"))
     .orderBy(desc(articles.publishedAt))
     .limit(limit);

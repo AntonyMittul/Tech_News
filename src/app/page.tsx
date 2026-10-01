@@ -105,9 +105,9 @@ export default async function Home() {
                       <div>
                         <div className="mb-3 flex flex-wrap items-center gap-3 font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--cyan)]"><span>{article.sourceName}</span><span className="text-[var(--muted)]">{formatPublishedAt(article.publishedAt)}</span></div>
                         <h2 className="max-w-2xl text-xl font-semibold leading-tight text-white transition group-hover:text-[var(--cyan)] sm:text-2xl"><a href={article.url} target="_blank" rel="noreferrer">{article.title}</a></h2>
-                        {article.description ? <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)]">{article.description}</p> : null}
+                        {article.summary || article.description ? <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)]">{article.summary ?? article.description}</p> : null}
                       </div>
-                      <div className="flex items-center justify-between border-t border-[var(--line)] pt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--muted)]"><span>{article.status === "published" ? "Published" : "Awaiting enrichment"}</span><a className="text-[var(--cyan)]" href={article.url} target="_blank" rel="noreferrer">Original source ↗</a></div>
+                      <div className="flex items-center justify-between border-t border-[var(--line)] pt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--muted)]"><span>{article.summary ? "Gemini enriched" : "Source excerpt"}</span><a className="text-[var(--cyan)]" href={article.url} target="_blank" rel="noreferrer">Original source ↗</a></div>
                     </div>
                   </article>
                 ))}

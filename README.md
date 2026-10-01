@@ -50,6 +50,14 @@ Classify existing stored articles and populate category/tag relations:
 npm run classify
 ```
 
+Enrich stored articles with Gemini 3.1 Flash-Lite:
+
+```bash
+npm run enrich
+```
+
+This requires a real `GEMINI_API_KEY` in `.env.local`. The command processes at most five articles by default; set `ENRICHMENT_LIMIT` to adjust the batch size. It never creates placeholder summaries when Gemini is unavailable.
+
 For RSS, also set `RSS_FEED_URL`, `RSS_SOURCE_NAME`, and `RSS_SOURCE_URL`.
 
 To preview a provider without writing to the database, open:
