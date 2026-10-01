@@ -35,6 +35,7 @@ export async function getArticles(input: ArticleQuery = {}) {
       publishedAt: articles.publishedAt,
       imageUrl: articles.imageUrl,
       description: articles.description,
+      readTimeMinutes: articles.readTimeMinutes,
       summary: articleSummaries.summary,
       status: articles.status,
     })
@@ -46,7 +47,27 @@ export async function getArticles(input: ArticleQuery = {}) {
     .limit(limit + 1)
     .offset((page - 1) * limit);
 
-  return { articles: rows.slice(0, limit), page, limit, hasMore: rows.length > limit };
+  const visibleRows = rows.slice(0, limit);
+  const categoryRows = visibleRows.length
+    ? await db
+        .select({ articleId: articleCategories.articleId, name: categories.name })
+        .from(articleCategories)
+        .innerJoin(categories, eq(articleCategories.categoryId, categories.id))
+        .where(inArray(articleCategories.articleId, visibleRows.map((article) => article.id)))
+    : [];
+  const categoryMap = new Map<string, string[]>();
+  for (const category of categoryRows) {
+    const names = categoryMap.get(category.articleId) ?? [];
+    names.push(category.name);
+    categoryMap.set(category.articleId, names);
+  }
+
+  return {
+    articles: visibleRows.map((article) => ({ ...article, categories: categoryMap.get(article.id) ?? [] })),
+    page,
+    limit,
+    hasMore: rows.length > limit,
+  };
 }
 
 export async function getLatestArticles(limit = 20) {
@@ -106,6 +127,7 @@ export async function getCategories() {
       id: categories.id,
       name: categories.name,
       sortOrder: categories.sortOrder,
+      slug: categories.slug,
     })
     .from(categories)
     .orderBy(categories.sortOrder);
