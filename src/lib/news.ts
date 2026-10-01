@@ -2,6 +2,7 @@ import { and, count, desc, eq, ilike, inArray, ne, or } from "drizzle-orm";
 
 import { db } from "@/db";
 import { articleCategories, articleSummaries, articleTags, articles, categories, sources, tags } from "@/db/schema";
+import { decodeHtmlEntities } from "./ingestion/utils";
 
 export type ArticleQuery = {
   page?: number;
@@ -35,6 +36,7 @@ export async function getArticles(input: ArticleQuery = {}) {
       publishedAt: articles.publishedAt,
       imageUrl: articles.imageUrl,
       description: articles.description,
+      contentExcerpt: articles.contentExcerpt,
       readTimeMinutes: articles.readTimeMinutes,
       summary: articleSummaries.summary,
       status: articles.status,
@@ -63,7 +65,25 @@ export async function getArticles(input: ArticleQuery = {}) {
   }
 
   return {
-    articles: visibleRows.map((article) => ({ ...article, categories: categoryMap.get(article.id) ?? [] })),
+    articles: visibleRows.map((article) => {
+      const description = decodeHtmlEntities(article.description);
+      const contentExcerpt = decodeHtmlEntities(article.contentExcerpt);
+      return {
+        id: article.id,
+        title: decodeHtmlEntities(article.title) ?? article.title,
+        slug: article.slug,
+        url: article.url,
+        sourceName: article.sourceName,
+        sourceSlug: article.sourceSlug,
+        publishedAt: article.publishedAt,
+        imageUrl: article.imageUrl,
+        description,
+        readTimeMinutes: article.readTimeMinutes,
+        summary: decodeHtmlEntities(article.summary) || description || contentExcerpt || "Read the original source for the complete report.",
+        status: article.status,
+        categories: categoryMap.get(article.id) ?? [],
+      };
+    }),
     page,
     limit,
     hasMore: rows.length > limit,
@@ -108,6 +128,7 @@ export async function getArticleBySlug(slug: string) {
       author: articles.author,
       imageUrl: articles.imageUrl,
       description: articles.description,
+      contentExcerpt: articles.contentExcerpt,
       readTimeMinutes: articles.readTimeMinutes,
       summary: articleSummaries.summary,
       keyPoints: articleSummaries.keyPoints,
@@ -157,7 +178,18 @@ export async function getArticleBySlug(slug: string) {
         .limit(4)
     : [];
 
-  return { ...article, categories: categoryRows, tags: tagRows, related };
+  return {
+    ...article,
+    title: decodeHtmlEntities(article.title) ?? article.title,
+    description: decodeHtmlEntities(article.description),
+    contentExcerpt: decodeHtmlEntities(article.contentExcerpt),
+    summary: decodeHtmlEntities(article.summary),
+    keyPoints: article.keyPoints?.map((point) => decodeHtmlEntities(point) ?? point) ?? null,
+    whyItMatters: decodeHtmlEntities(article.whyItMatters),
+    categories: categoryRows,
+    tags: tagRows,
+    related: related.map((item) => ({ ...item, title: decodeHtmlEntities(item.title) ?? item.title })),
+  };
 }
 
 export async function getCategories() {

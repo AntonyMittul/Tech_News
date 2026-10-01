@@ -7,16 +7,27 @@ export function clampLimit(limit = 20, max = 50) {
 export function stripHtml(value?: string | null) {
   if (!value) return undefined;
 
-  const text = value
+  const text = (decodeHtmlEntities(value) ?? "")
     .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
     .replace(/\s+/g, " ")
     .trim();
 
   return text || undefined;
+}
+
+export function decodeHtmlEntities(value?: string | null) {
+  if (!value) return value ?? undefined;
+
+  return value
+    .replace(/&#x([0-9a-f]+);/gi, (_, code: string) => String.fromCodePoint(Number.parseInt(code, 16)))
+    .replace(/&#(\d+);/g, (_, code: string) => String.fromCodePoint(Number.parseInt(code, 10)))
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;/gi, "'")
+    .replace(/&#39;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">");
 }
 
 export function canonicalizeUrl(value: string) {
