@@ -12,6 +12,18 @@
   --amber: #ffc857;
 }
 
+:root[data-theme="light"] {
+  --background: #eef7f5;
+  --foreground: #102126;
+  --panel: #ffffff;
+  --panel-raised: #e4f0ee;
+  --line: #c1d9d5;
+  --muted: #527078;
+  --cyan: #007d70;
+  --pink: #c52b78;
+  --amber: #a46300;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -47,19 +59,19 @@ a {
 
 ::selection {
   background: color-mix(in srgb, var(--cyan) 30%, transparent);
-  color: white;
+  color: var(--foreground);
 }
 
 .signal-grid {
   background-image:
-    linear-gradient(rgba(69, 244, 209, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(69, 244, 209, 0.035) 1px, transparent 1px);
+    linear-gradient(color-mix(in srgb, var(--cyan) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--cyan) 6%, transparent) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 
 .scanlines {
   background-image: linear-gradient(
-    rgba(255, 255, 255, 0.018) 1px,
+    color-mix(in srgb, var(--foreground) 3%, transparent) 1px,
     transparent 1px
   );
   background-size: 100% 4px;
@@ -67,11 +79,11 @@ a {
 }
 
 .text-glow {
-  text-shadow: 0 0 24px rgba(69, 244, 209, 0.24);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--cyan) 24%, transparent);
 }
 
 .panel-glow {
-  box-shadow: 0 0 0 1px rgba(69, 244, 209, 0.08), 0 16px 50px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cyan) 8%, transparent), 0 16px 50px color-mix(in srgb, #000 20%, transparent);
 }
 
 .focus-ring:focus-visible {

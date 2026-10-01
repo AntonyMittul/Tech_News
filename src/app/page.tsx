@@ -1,4 +1,5 @@
 import { getCategories, getLatestArticles } from "@/lib/news";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const dynamic = "force-dynamic";
 
@@ -31,12 +32,12 @@ export default async function Home() {
   return (
     <div className="signal-grid relative min-h-screen overflow-hidden bg-[var(--background)]">
       <div className="scanlines absolute inset-0 z-0 opacity-50" />
-      <header className="relative z-10 border-b border-[var(--line)] bg-[#080a0f]/90 backdrop-blur-md">
+      <header className="relative z-10 border-b border-[var(--line)] bg-[var(--background)]/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-6 px-5 py-4 lg:px-8">
           <div className="flex items-center gap-3">
             <SignalMark />
             <div>
-              <p className="font-mono text-sm font-bold tracking-[0.2em] text-white">SIGNAL</p>
+              <p className="font-mono text-sm font-bold tracking-[0.2em] text-[var(--foreground)]">SIGNAL</p>
               <p className="font-mono text-[9px] tracking-[0.16em] text-[var(--muted)]">TECH INTELLIGENCE / LIVE</p>
             </div>
           </div>
@@ -44,9 +45,7 @@ export default async function Home() {
             <span className="flex items-center gap-2"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--cyan)]" />Database feed</span>
             <span>Real sources only</span>
           </div>
-          <a className="focus-ring border border-[var(--line)] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] transition hover:border-[var(--cyan)] hover:text-[var(--cyan)]" href="https://github.com/AntonyMittul/Tech_News" target="_blank" rel="noreferrer">
-            [ source ]
-          </a>
+          <div className="flex items-center gap-2"><ThemeToggle /><a className="focus-ring hidden border border-[var(--line)] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] transition hover:border-[var(--cyan)] hover:text-[var(--cyan)] sm:block" href="https://github.com/AntonyMittul/Tech_News" target="_blank" rel="noreferrer">[ source ]</a></div>
         </div>
       </header>
 
@@ -54,7 +53,7 @@ export default async function Home() {
         <section className="mb-10 flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
           <div>
             <p className="mb-4 font-mono text-xs uppercase tracking-[0.26em] text-[var(--cyan)]">{"// curated intelligence feed"}</p>
-            <h1 className="text-glow max-w-4xl text-4xl font-bold leading-[0.98] tracking-[-0.05em] text-white sm:text-6xl lg:text-7xl">
+            <h1 className="text-glow max-w-4xl text-4xl font-bold leading-[0.98] tracking-[-0.05em] text-[var(--foreground)] sm:text-6xl lg:text-7xl">
               The signal beneath<br /><span className="text-[var(--cyan)]">the noise.</span>
             </h1>
             <p className="mt-5 max-w-xl text-sm leading-7 text-[var(--muted)] sm:text-base">
@@ -66,7 +65,7 @@ export default async function Home() {
               <span>Live records</span><span className="text-[var(--cyan)]">{articles.length.toString().padStart(2, "0")}</span>
             </div>
             <div className="h-1 bg-[#1a2730]"><div className="h-full w-full bg-[var(--cyan)] shadow-[0_0_12px_var(--cyan)]" /></div>
-            <div className="mt-3 flex justify-between font-mono text-[10px] text-[var(--muted)]"><span>Feed integrity</span><span className="text-white">Source-linked</span></div>
+            <div className="mt-3 flex justify-between font-mono text-[10px] text-[var(--muted)]"><span>Feed integrity</span><span className="text-[var(--foreground)]">Source-linked</span></div>
           </div>
         </section>
 
@@ -81,16 +80,16 @@ export default async function Home() {
 
           <section>
             <div className="mb-4 flex items-center justify-between border-b border-[var(--line)] pb-3">
-              <div className="flex items-center gap-3"><span className="font-mono text-xs uppercase tracking-[0.18em] text-white">Latest signals</span><span className="bg-[var(--cyan)] px-2 py-0.5 font-mono text-[9px] font-bold text-[#07100f]">LIVE</span></div>
+              <div className="flex items-center gap-3"><span className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--foreground)]">Latest signals</span><span className="bg-[var(--cyan)] px-2 py-0.5 font-mono text-[9px] font-bold text-[var(--background)]">LIVE</span></div>
               <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--muted)]">Newest first</span>
             </div>
 
             {articles.length === 0 ? (
               <div className="panel-glow border border-dashed border-[var(--line)] bg-[var(--panel)] p-10 text-center">
                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--cyan)]">No live records</p>
-                <h2 className="mt-4 text-2xl font-semibold text-white">The feed is waiting for real news.</h2>
+                <h2 className="mt-4 text-2xl font-semibold text-[var(--foreground)]">The feed is waiting for real news.</h2>
                 <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-[var(--muted)]">Run an ingestion provider to populate this dashboard. No placeholder articles are shown.</p>
-                <code className="mt-6 inline-block border border-[var(--line)] bg-[#080a0f] px-4 py-3 font-mono text-xs text-[var(--cyan)]">npm run ingest -- hacker-news</code>
+                <code className="mt-6 inline-block border border-[var(--line)] bg-[var(--background)] px-4 py-3 font-mono text-xs text-[var(--cyan)]">npm run ingest -- hacker-news</code>
               </div>
             ) : (
               <div className="space-y-4">
@@ -99,12 +98,12 @@ export default async function Home() {
                     <div className={`relative min-h-32 overflow-hidden border border-white/10 bg-gradient-to-br ${accentClasses[index % accentClasses.length]}`}>
                       {article.imageUrl ? <div className="absolute inset-0 bg-cover bg-center opacity-70" style={{ backgroundImage: `url(${article.imageUrl})` }} /> : null}
                       <div className="absolute inset-0 opacity-60" style={{ backgroundImage: "radial-gradient(circle at 30% 30%, rgba(255,255,255,.2) 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
-                      <span className="absolute bottom-3 left-3 font-mono text-3xl font-bold text-white/20">{String(index + 1).padStart(2, "0")}</span>
+                      <span className="absolute bottom-3 left-3 font-mono text-3xl font-bold text-[var(--foreground)]/20">{String(index + 1).padStart(2, "0")}</span>
                     </div>
                     <div className="flex flex-col justify-between gap-5">
                       <div>
                         <div className="mb-3 flex flex-wrap items-center gap-3 font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--cyan)]"><span>{article.sourceName}</span><span className="text-[var(--muted)]">{formatPublishedAt(article.publishedAt)}</span></div>
-                        <h2 className="max-w-2xl text-xl font-semibold leading-tight text-white transition group-hover:text-[var(--cyan)] sm:text-2xl"><a href={article.url} target="_blank" rel="noreferrer">{article.title}</a></h2>
+                        <h2 className="max-w-2xl text-xl font-semibold leading-tight text-[var(--foreground)] transition group-hover:text-[var(--cyan)] sm:text-2xl"><a href={article.url} target="_blank" rel="noreferrer">{article.title}</a></h2>
                         {article.summary || article.description ? <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)]">{article.summary ?? article.description}</p> : null}
                       </div>
                       <div className="flex items-center justify-between border-t border-[var(--line)] pt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--muted)]"><span>{article.summary ? "Gemini enriched" : "Source excerpt"}</span><a className="text-[var(--cyan)]" href={article.url} target="_blank" rel="noreferrer">Original source ↗</a></div>
