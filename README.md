@@ -42,7 +42,10 @@ The other providers require their corresponding keys in `.env.local`:
 npm run ingest -- guardian
 npm run ingest -- gnews
 npm run ingest -- rss
+npm run ingest -- thenewsapi
 ```
+
+For The News API, set `THENEWSAPI_API_TOKEN` in `.env.local`. The token is only read by the server-side ingestion provider and must never be exposed in client-side code.
 
 Classify existing stored articles and populate category/tag relations:
 
@@ -99,6 +102,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run db:seed` | Insert initial sources and categories |
 | `npm run db:studio` | Open Drizzle Studio |
 | `npm run ingest -- hacker-news` | Fetch and persist provider articles |
+| `npm run ingest -- thenewsapi` | Fetch and persist live technology articles from The News API |
 
 The Docker database is exposed on port `5433` so it does not conflict with a PostgreSQL installation already using port `5432`.
 

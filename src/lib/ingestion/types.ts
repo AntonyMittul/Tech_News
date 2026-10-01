@@ -1,4 +1,4 @@
-export const providerNames = ["rss", "hacker-news", "guardian", "gnews"] as const;
+export const providerNames = ["rss", "hacker-news", "guardian", "gnews", "thenewsapi"] as const;
 
 export type ProviderName = (typeof providerNames)[number];
 

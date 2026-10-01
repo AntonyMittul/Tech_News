@@ -2,7 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 
-type Category = { id: string; name: string; slug: string; sortOrder: number };
+type Category = { id: string; name: string; slug: string; sortOrder: number; articleCount: number };
 type Article = {
   id: string;
   title: string;
@@ -63,7 +63,7 @@ export function NewsFeed() {
   useEffect(() => {
     fetch("/api/categories", { cache: "no-store" })
       .then((response) => response.json())
-      .then((data: { categories: Category[] }) => setCategories(data.categories))
+      .then((data: { categories: Category[] }) => setCategories(data.categories.filter((category) => category.articleCount > 0)))
       .catch(() => setError("Categories could not be loaded."));
   }, []);
 
@@ -88,7 +88,7 @@ export function NewsFeed() {
         <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Channels / {categories.length.toString().padStart(2, "0")}</p>
         <nav className="flex gap-2 overflow-x-auto pb-2 lg:block lg:space-y-1 lg:overflow-visible" aria-label="News categories">
           <button className={`focus-ring shrink-0 border px-3 py-3 text-left text-xs transition lg:w-full ${!activeCategory ? "border-[var(--cyan)]/40 bg-[var(--cyan)]/10 text-[var(--cyan)]" : "border-transparent text-[var(--muted)] hover:border-[var(--line)]"}`} type="button" onClick={() => selectCategory("")}>All live signals</button>
-          {categories.map((category) => <button key={category.id} className={`focus-ring shrink-0 border px-3 py-3 text-left text-xs transition lg:w-full ${activeCategory === category.slug ? "border-[var(--cyan)]/40 bg-[var(--cyan)]/10 text-[var(--cyan)]" : "border-transparent text-[var(--muted)] hover:border-[var(--line)]"}`} type="button" onClick={() => selectCategory(category.slug)}>{category.name}</button>)}
+          {categories.map((category) => <button key={category.id} className={`focus-ring shrink-0 border px-3 py-3 text-left text-xs transition lg:w-full ${activeCategory === category.slug ? "border-[var(--cyan)]/40 bg-[var(--cyan)]/10 text-[var(--cyan)]" : "border-transparent text-[var(--muted)] hover:border-[var(--line)]"}`} type="button" onClick={() => selectCategory(category.slug)}>{category.name}<span className="ml-2 font-mono text-[9px] text-[var(--muted)]">{category.articleCount}</span></button>)}
         </nav>
       </aside>
 

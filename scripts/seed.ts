@@ -31,6 +31,13 @@ const sourceSeed = [
     trustScore: 65,
   },
   {
+    name: "The News API",
+    slug: "the-news-api",
+    baseUrl: "https://www.thenewsapi.com",
+    type: "api" as const,
+    trustScore: 75,
+  },
+  {
     name: "Technology RSS",
     slug: "technology-rss",
     baseUrl: "https://example.com",

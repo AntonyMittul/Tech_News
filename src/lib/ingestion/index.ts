@@ -89,6 +89,7 @@ export async function runIngestion(providerName: ProviderName, input: FetchArtic
         guardian: "the-guardian",
         gnews: "gnews",
         rss: "technology-rss",
+        thenewsapi: "the-news-api",
       } satisfies Record<ProviderName, string>)[providerName];
   const source = await db.query.sources.findFirst({ where: eq(sources.slug, sourceSlug) });
   if (!source) {

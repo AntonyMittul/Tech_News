@@ -1,4 +1,4 @@
-import { and, desc, eq, ilike, inArray, ne, or } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, ne, or } from "drizzle-orm";
 
 import { db } from "@/db";
 import { articleCategories, articleSummaries, articles, categories, sources } from "@/db/schema";
@@ -128,7 +128,11 @@ export async function getCategories() {
       name: categories.name,
       sortOrder: categories.sortOrder,
       slug: categories.slug,
+      articleCount: count(articles.id),
     })
     .from(categories)
+    .leftJoin(articleCategories, eq(articleCategories.categoryId, categories.id))
+    .leftJoin(articles, and(eq(articleCategories.articleId, articles.id), ne(articles.status, "hidden")))
+    .groupBy(categories.id)
     .orderBy(categories.sortOrder);
 }
