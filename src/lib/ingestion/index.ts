@@ -1,7 +1,8 @@
-import { eq } from "drizzle-orm";
+import { and, eq, gte, ne } from "drizzle-orm";
 
 import { db } from "@/db";
-import { articles, ingestionRuns, sources } from "@/db/schema";
+import { articleCategories, articleTags, articles, categories, ingestionRuns, sources, tags } from "@/db/schema";
+import { classifyArticle, titleSimilarity } from "./classify";
 import type { FetchArticlesInput, NormalizedArticle, ProviderName } from "./types";
 import { getProvider } from "./providers";
 import { canonicalizeUrl, fingerprintArticle, slugify } from "./utils";
@@ -13,13 +14,28 @@ export async function fetchProviderArticles(providerName: ProviderName, input?: 
 export async function persistArticles(providerName: ProviderName, sourceId: string, items: NormalizedArticle[]) {
   let inserted = 0;
   let skipped = 0;
+  let duplicates = 0;
+  const categoryRows = await db.select({ id: categories.id, slug: categories.slug }).from(categories);
+  const recentArticles = await db
+    .select({ id: articles.id, title: articles.title, publishedAt: articles.publishedAt })
+    .from(articles)
+    .where(and(ne(articles.status, "hidden"), gte(articles.publishedAt, new Date(Date.now() - 72 * 60 * 60 * 1000))));
 
   for (const item of items) {
     const canonicalUrl = canonicalizeUrl(item.url);
+    const semanticDuplicate = recentArticles.some(
+      (existing) => Math.abs(existing.publishedAt.getTime() - item.publishedAt.getTime()) < 72 * 60 * 60 * 1000 && titleSimilarity(existing.title, item.title) >= 0.82,
+    );
+    if (semanticDuplicate) {
+      skipped += 1;
+      duplicates += 1;
+      continue;
+    }
+
     const fingerprint = fingerprintArticle(item.title, canonicalUrl);
     const slug = `${slugify(item.title) || "article"}-${fingerprint.slice(0, 10)}`;
 
-    const result = await db
+    const [created] = await db
       .insert(articles)
       .values({
         sourceId,
@@ -36,13 +52,32 @@ export async function persistArticles(providerName: ProviderName, sourceId: stri
         readTimeMinutes: estimateReadTime(item.contentExcerpt ?? item.description),
         status: "pending",
       })
-      .onConflictDoNothing({ target: articles.canonicalUrl });
+      .onConflictDoNothing({ target: articles.canonicalUrl })
+      .returning({ id: articles.id });
 
-    if (result.rowCount === 1) inserted += 1;
-    else skipped += 1;
+    if (!created) {
+      skipped += 1;
+      continue;
+    }
+
+    const classification = classifyArticle(item.title, item.description, item.contentExcerpt);
+    const matchedCategories = categoryRows.filter((category) => classification.categorySlugs.includes(category.slug));
+    if (matchedCategories.length > 0) {
+      await db.insert(articleCategories).values(matchedCategories.map((category) => ({ articleId: created.id, categoryId: category.id }))).onConflictDoNothing();
+    }
+
+    for (const tagSlug of classification.tags) {
+      const tagName = tagSlug.split("-").map((word) => word[0].toUpperCase() + word.slice(1)).join(" ");
+      await db.insert(tags).values({ name: tagName, slug: tagSlug }).onConflictDoNothing({ target: tags.slug });
+      const [tag] = await db.select({ id: tags.id }).from(tags).where(eq(tags.slug, tagSlug)).limit(1);
+      if (tag) await db.insert(articleTags).values({ articleId: created.id, tagId: tag.id, confidence: 0.75 }).onConflictDoNothing();
+    }
+
+    recentArticles.push({ id: created.id, title: item.title, publishedAt: item.publishedAt });
+    inserted += 1;
   }
 
-  return { inserted, skipped };
+  return { inserted, skipped, duplicates };
 }
 
 export async function runIngestion(providerName: ProviderName, input: FetchArticlesInput = {}) {

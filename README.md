@@ -44,6 +44,12 @@ npm run ingest -- gnews
 npm run ingest -- rss
 ```
 
+Classify existing stored articles and populate category/tag relations:
+
+```bash
+npm run classify
+```
+
 For RSS, also set `RSS_FEED_URL`, `RSS_SOURCE_NAME`, and `RSS_SOURCE_URL`.
 
 To preview a provider without writing to the database, open:
