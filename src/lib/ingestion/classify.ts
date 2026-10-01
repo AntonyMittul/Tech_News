@@ -1,10 +1,10 @@
 const categoryRules = [
   { slug: "artificial-intelligence", terms: ["artificial intelligence", "generative ai", " ai ", "llm", "large language", "chatbot", "ai agent"] },
   { slug: "software-engineering", terms: ["software", "developer", "programming", "open source", "github", "database", "compiler", "engineering"] },
-  { slug: "data-science", terms: ["data science", "analytics", "data platform", "big data", "data pipeline", "visualization"] },
+  { slug: "data-science", terms: ["data science", "data scientist", "analytics", "data platform", "big data", "data pipeline", "visualization", "statistics"] },
   { slug: "machine-learning", terms: ["machine learning", "deep learning", "neural network", "model training", "inference", "pytorch", "tensorflow"] },
   { slug: "corporate-technology", terms: ["acquisition", "merger", "earnings", "revenue", "ipo", "funding", "valuation", "ceo", "corporate"] },
-  { slug: "hiring-layoffs", terms: ["hiring", "job", "jobs", "layoff", "workforce", "recruiting", "career", "employment"] },
+  { slug: "hiring-layoffs", terms: ["hiring", "job", "jobs", "layoff", "workforce", "workforce reduction", "headcount", "recruiting", "recruitment", "career", "employment", "open roles"] },
   { slug: "cybersecurity", terms: ["cybersecurity", "cyber attack", "ransomware", "vulnerability", "breach", "security", "malware"] },
 ] as const;
 

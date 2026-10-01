@@ -15,6 +15,9 @@ if (!provider || !providerNames.includes(provider)) {
 } else {
   runIngestion(provider, {
     limit: Number(process.env.INGESTION_LIMIT ?? "20"),
+    publishedAfter: process.env.INGESTION_LOOKBACK_HOURS
+      ? new Date(Date.now() - Number(process.env.INGESTION_LOOKBACK_HOURS) * 60 * 60 * 1000)
+      : undefined,
     feedUrl: process.env.RSS_FEED_URL,
     sourceName: process.env.RSS_SOURCE_NAME,
     sourceUrl: process.env.RSS_SOURCE_URL,

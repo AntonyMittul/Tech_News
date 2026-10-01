@@ -28,7 +28,7 @@ export const theNewsApiProvider: NewsProvider = {
       throw new Error("THENEWSAPI_API_TOKEN is not configured");
     }
 
-    const search = input.query ?? '("artificial intelligence" | "machine learning" | "data science" | "software engineering" | cybersecurity | hiring | layoffs | "cloud computing" | semiconductor | startup)';
+    const search = input.query ?? '("artificial intelligence" | "machine learning" | "data science" | "data scientist" | "software engineering" | cybersecurity | hiring | layoffs | recruiting | "workforce reduction" | "cloud computing" | semiconductor | startup)';
     const params = new URLSearchParams({
       api_token: apiToken,
       categories: "tech",
@@ -38,6 +38,9 @@ export const theNewsApiProvider: NewsProvider = {
       search,
       search_fields: "title,description,keywords",
     });
+    if (input.publishedAfter) {
+      params.set("published_after", input.publishedAfter.toISOString().replace(/\.\d{3}Z$/, ""));
+    }
 
     const response = await fetchJson<TheNewsApiResponse>(`https://api.thenewsapi.com/v1/news/top?${params}`);
 

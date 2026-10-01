@@ -4,6 +4,7 @@ export type ProviderName = (typeof providerNames)[number];
 
 export type FetchArticlesInput = {
   limit?: number;
+  publishedAfter?: Date;
   feedUrl?: string;
   sourceName?: string;
   sourceUrl?: string;

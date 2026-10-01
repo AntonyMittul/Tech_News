@@ -14,6 +14,7 @@
     "db:seed": "tsx scripts/seed.ts",
     "db:studio": "drizzle-kit studio",
     "ingest": "tsx scripts/ingest.ts",
+    "refresh": "tsx scripts/refresh.ts",
     "classify": "tsx scripts/classify.ts",
     "enrich": "tsx scripts/enrich.ts"
   },
