@@ -1,7 +1,7 @@
 import { and, count, desc, eq, ilike, inArray, ne, or } from "drizzle-orm";
 
 import { db } from "@/db";
-import { articleCategories, articleSummaries, articles, categories, sources } from "@/db/schema";
+import { articleCategories, articleSummaries, articleTags, articles, categories, sources, tags } from "@/db/schema";
 
 export type ArticleQuery = {
   page?: number;
@@ -108,6 +108,7 @@ export async function getArticleBySlug(slug: string) {
       author: articles.author,
       imageUrl: articles.imageUrl,
       description: articles.description,
+      readTimeMinutes: articles.readTimeMinutes,
       summary: articleSummaries.summary,
       keyPoints: articleSummaries.keyPoints,
       whyItMatters: articleSummaries.whyItMatters,
@@ -118,7 +119,45 @@ export async function getArticleBySlug(slug: string) {
     .where(and(eq(articles.slug, slug), ne(articles.status, "hidden")))
     .limit(1);
 
-  return article;
+  if (!article) return undefined;
+
+  const [categoryRows, tagRows] = await Promise.all([
+    db
+      .select({ id: categories.id, name: categories.name, slug: categories.slug })
+      .from(articleCategories)
+      .innerJoin(categories, eq(articleCategories.categoryId, categories.id))
+      .where(eq(articleCategories.articleId, article.id)),
+    db
+      .select({ name: tags.name, slug: tags.slug })
+      .from(articleTags)
+      .innerJoin(tags, eq(articleTags.tagId, tags.id))
+      .where(eq(articleTags.articleId, article.id)),
+  ]);
+
+  const relatedCategoryIds = categoryRows.map((category) => category.id);
+  const relatedIds = relatedCategoryIds.length
+    ? await db
+        .select({ articleId: articleCategories.articleId })
+        .from(articleCategories)
+        .where(and(inArray(articleCategories.categoryId, relatedCategoryIds), ne(articleCategories.articleId, article.id)))
+    : [];
+  const related = relatedIds.length
+    ? await db
+        .select({
+          id: articles.id,
+          slug: articles.slug,
+          title: articles.title,
+          sourceName: sources.name,
+          publishedAt: articles.publishedAt,
+        })
+        .from(articles)
+        .innerJoin(sources, eq(articles.sourceId, sources.id))
+        .where(and(inArray(articles.id, relatedIds.map((row) => row.articleId)), ne(articles.status, "hidden")))
+        .orderBy(desc(articles.publishedAt))
+        .limit(4)
+    : [];
+
+  return { ...article, categories: categoryRows, tags: tagRows, related };
 }
 
 export async function getCategories() {
