@@ -1,9 +1,12 @@
-import "dotenv/config";
+import { config } from "dotenv";
 
 import { eq } from "drizzle-orm";
 
 import { db, pool } from "../src/db";
 import { categories, sources } from "../src/db/schema";
+
+config({ path: ".env.local" });
+config();
 
 const sourceSeed = [
   {
@@ -19,6 +22,13 @@ const sourceSeed = [
     baseUrl: "https://www.theguardian.com",
     type: "api" as const,
     trustScore: 90,
+  },
+  {
+    name: "GNews",
+    slug: "gnews",
+    baseUrl: "https://gnews.io",
+    type: "api" as const,
+    trustScore: 65,
   },
   {
     name: "Technology RSS",

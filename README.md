@@ -30,6 +30,28 @@ npm run db:migrate
 npm run db:seed
 ```
 
+Fetch and persist Hacker News stories:
+
+```bash
+npm run ingest -- hacker-news
+```
+
+The other providers require their corresponding keys in `.env.local`:
+
+```bash
+npm run ingest -- guardian
+npm run ingest -- gnews
+npm run ingest -- rss
+```
+
+For RSS, also set `RSS_FEED_URL`, `RSS_SOURCE_NAME`, and `RSS_SOURCE_URL`.
+
+To preview a provider without writing to the database, open:
+
+```text
+http://localhost:3000/api/ingestion/preview?provider=hacker-news&limit=5
+```
+
 Start the application:
 
 ```bash
@@ -48,6 +70,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run db:migrate` | Apply migrations to PostgreSQL |
 | `npm run db:seed` | Insert initial sources and categories |
 | `npm run db:studio` | Open Drizzle Studio |
+| `npm run ingest -- hacker-news` | Fetch and persist provider articles |
 
 The Docker database is exposed on port `5433` so it does not conflict with a PostgreSQL installation already using port `5432`.
 
