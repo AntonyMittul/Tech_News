@@ -53,7 +53,7 @@ To refresh the feed with only recent stories, run:
 npm run refresh
 ```
 
-`npm run refresh` imports stories from the last 48 hours by default and keeps the canonical URL/title deduplication rules, so rerunning it does not create repeated cards. Set `INGESTION_LOOKBACK_HOURS` in `.env.local` to change the window. For a daily local refresh, schedule `npm run refresh` once per day with Windows Task Scheduler or your operating system's scheduler.
+`npm run refresh` imports general technology, workforce, and data-science stories from the last 48 hours by default. It keeps the canonical URL/title deduplication rules, so rerunning it does not create repeated cards. Set `INGESTION_LOOKBACK_HOURS` in `.env.local` to change the window. For a daily local refresh, schedule `npm run refresh` once per day with Windows Task Scheduler or your operating system's scheduler.
 
 Classify existing stored articles and populate category/tag relations:
 

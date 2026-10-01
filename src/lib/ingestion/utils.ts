@@ -56,7 +56,9 @@ export async function fetchJson<T>(url: string, init?: RequestInit) {
   });
 
   if (!response.ok) {
-    throw new Error(`Provider request failed (${response.status}): ${url}`);
+    const safeUrl = new URL(url);
+    if (safeUrl.searchParams.has("api_token")) safeUrl.searchParams.set("api_token", "[redacted]");
+    throw new Error(`Provider request failed (${response.status}): ${safeUrl}`);
   }
 
   return (await response.json()) as T;
