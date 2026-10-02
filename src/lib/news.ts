@@ -1,4 +1,4 @@
-import { and, count, desc, eq, ilike, inArray, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, ne, or, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { articleCategories, articleSummaries, articleTags, articles, categories, sources, tags } from "@/db/schema";
@@ -21,8 +21,13 @@ function readableArticleFilter() {
       ${articles.title} ILIKE '%openai%'
       OR ${articles.title} ILIKE '%anthropic%'
       OR ${articles.title} ILIKE '%deepmind%'
+      OR ${articles.title} ILIKE '%google%'
       OR ${articles.title} ILIKE '%microsoft%'
+      OR ${articles.title} ILIKE '%amazon%'
+      OR ${articles.title} ILIKE '%meta%'
+      OR ${articles.title} ILIKE '%apple%'
       OR ${articles.title} ILIKE '%nvidia%'
+      OR ${articles.title} ILIKE '%intel%'
       OR ${articles.title} ILIKE '%github%'
       OR ${articles.title} ILIKE '%linux%'
       OR ${articles.title} ILIKE '%gpt%'
@@ -61,6 +66,10 @@ function readableArticleFilter() {
       OR ${articles.title} ILIKE '%software%'
       OR ${articles.title} ILIKE '%developer%'
       OR ${articles.title} ILIKE '%engineer%'
+      OR ${articles.title} ILIKE '%google%'
+      OR ${articles.title} ILIKE '%amazon%'
+      OR ${articles.title} ILIKE '%meta%'
+      OR ${articles.title} ILIKE '%apple%'
       OR ${articles.title} ILIKE '%data%'
       OR ${articles.title} ILIKE '%cloud%'
       OR ${articles.title} ILIKE '%cyber%'
@@ -70,10 +79,11 @@ function readableArticleFilter() {
       OR ${articles.title} ILIKE '%robotics%'
       OR ${articles.title} ILIKE '%startup%'
     )
-    AND
-    (${articleSummaries.summary} IS NOT NULL AND length(trim(${articleSummaries.summary})) >= 100 AND ${articleSummaries.summary} NOT LIKE '%...%' AND ${articleSummaries.summary} NOT LIKE '%…%')
-    OR (${articles.description} IS NOT NULL AND length(trim(${articles.description})) >= 100 AND ${articles.description} NOT LIKE '%...%' AND ${articles.description} NOT LIKE '%…%')
-    OR (${articles.contentExcerpt} IS NOT NULL AND length(trim(${articles.contentExcerpt})) >= 100 AND ${articles.contentExcerpt} NOT LIKE '%...%' AND ${articles.contentExcerpt} NOT LIKE '%…%')
+    AND (
+      (${articleSummaries.summary} IS NOT NULL AND length(trim(${articleSummaries.summary})) >= 100 AND ${articleSummaries.summary} NOT LIKE '%...%' AND ${articleSummaries.summary} NOT LIKE '%…%')
+      OR (${articles.description} IS NOT NULL AND length(trim(${articles.description})) >= 100 AND ${articles.description} NOT LIKE '%...%' AND ${articles.description} NOT LIKE '%…%')
+      OR (${articles.contentExcerpt} IS NOT NULL AND length(trim(${articles.contentExcerpt})) >= 100 AND ${articles.contentExcerpt} NOT LIKE '%...%' AND ${articles.contentExcerpt} NOT LIKE '%…%')
+    )
   )`;
 }
 
@@ -268,18 +278,36 @@ export async function getArticleBySlug(slug: string) {
 }
 
 export async function getCategories() {
-  return db
-    .select({
-      id: categories.id,
-      name: categories.name,
-      sortOrder: categories.sortOrder,
-      slug: categories.slug,
-      articleCount: count(articles.id),
-    })
-    .from(categories)
-    .leftJoin(articleCategories, eq(articleCategories.categoryId, categories.id))
-    .leftJoin(articleSummaries, eq(articleSummaries.articleId, articleCategories.articleId))
-    .leftJoin(articles, and(eq(articleCategories.articleId, articles.id), ne(articles.status, "hidden"), readableArticleFilter()))
-    .groupBy(categories.id)
-    .orderBy(categories.sortOrder);
+  const [categoryRows, articleRows] = await Promise.all([
+    db
+      .select({
+        id: categories.id,
+        name: categories.name,
+        sortOrder: categories.sortOrder,
+        slug: categories.slug,
+      })
+      .from(categories)
+      .orderBy(categories.sortOrder),
+    db
+      .select({
+        categoryId: articleCategories.categoryId,
+        articleId: articles.id,
+        title: articles.title,
+      })
+      .from(articleCategories)
+      .innerJoin(articles, eq(articleCategories.articleId, articles.id))
+      .leftJoin(articleSummaries, eq(articleSummaries.articleId, articles.id))
+      .where(and(ne(articles.status, "hidden"), readableArticleFilter())),
+  ]);
+
+  const articleCounts = new Map<string, number>();
+  for (const article of articleRows) {
+    if (!isUsefulHeadline(article.title)) continue;
+    articleCounts.set(article.categoryId, (articleCounts.get(article.categoryId) ?? 0) + 1);
+  }
+
+  return categoryRows.map((category) => ({
+    ...category,
+    articleCount: articleCounts.get(category.id) ?? 0,
+  }));
 }

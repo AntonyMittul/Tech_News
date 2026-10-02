@@ -23,7 +23,7 @@ function sourceUrl(source?: string) {
 function relevanceScore(title: string, description?: string, source?: string) {
   const text = `${title} ${description ?? ""}`.toLowerCase();
   const highSignal = [
-    "openai", "anthropic", "google deepmind", "microsoft", "meta ai", "nvidia", "github", "linux", "gpt", "gemini", "claude", "llm",
+    "openai", "anthropic", "google", "microsoft", "amazon", "meta", "apple", "nvidia", "intel", "github", "linux", "gpt", "gemini", "claude", "llm",
     "new model", "model release", "launches", "released", "research", "benchmark", "open source",
     "api", "framework", "programming language", "database", "cloud infrastructure", "semiconductor",
     "cve-", "zero-day", "vulnerability", "ransomware", "data breach", "layoffs", "hiring", "headcount",
@@ -36,7 +36,7 @@ function relevanceScore(title: string, description?: string, source?: string) {
   const trustedSource = ["openai.com", "anthropic.com", "blog.google", "github.blog", "microsoft.com", "arstechnica.com", "theregister.com", "bleepingcomputer.com"];
   const titleText = title.toLowerCase();
   const titleSignals = highSignal.filter((term) => titleText.includes(term)).length;
-  const technicalTitleSignals = ["technology", "tech", "software", "developer", "engineer", "programming", "ai", "data", "cloud", "cyber", "computer", "robotics", "startup", "openai", "anthropic", "microsoft", "nvidia"].filter((term) => term.length <= 3 ? new RegExp(`\\b${term}\\b`).test(titleText) : titleText.includes(term)).length;
+  const technicalTitleSignals = ["technology", "tech", "software", "developer", "engineer", "programming", "ai", "data", "cloud", "cyber", "computer", "robotics", "startup", "openai", "anthropic", "google", "microsoft", "amazon", "meta", "apple", "nvidia", "intel"].filter((term) => term.length <= 3 ? new RegExp(`\\b${term}\\b`).test(titleText) : titleText.includes(term)).length;
   let score = highSignal.reduce((total, term) => total + (text.includes(term) ? 2 : 0), 0);
   score -= lowSignal.reduce((total, term) => total + (text.includes(term) ? 3 : 0), 0);
   if (trustedSource.some((domain) => source?.toLowerCase().includes(domain))) score += 2;
@@ -53,7 +53,7 @@ export const theNewsApiProvider: NewsProvider = {
       throw new Error("THENEWSAPI_API_TOKEN is not configured");
     }
 
-    const search = input.query ?? '("artificial intelligence" | "machine learning" | "data science" | "data scientist" | "software engineering" | cybersecurity | hiring | layoffs | recruiting | "workforce reduction" | "cloud computing" | semiconductor | startup)';
+    const search = input.query ?? '("artificial intelligence" | "machine learning" | "data science" | "data scientist" | "software engineering" | cybersecurity | "tech hiring" | "technology hiring" | "software engineer hiring" | "developer hiring" | "AI hiring" | "tech layoffs" | "technology layoffs" | "software layoffs" | "AI layoffs" | "workforce reduction" | "cloud computing" | semiconductor | startup)';
     const params = new URLSearchParams({
       api_token: apiToken,
       categories: "tech",

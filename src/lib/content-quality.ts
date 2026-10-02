@@ -15,7 +15,7 @@ export function isUsefulHeadline(title: string) {
   if (lowSignal.some((term) => text.includes(term))) return false;
 
   const highSignal = [
-    "openai", "anthropic", "deepmind", "microsoft", "nvidia", "github", "linux", "gpt", "gemini", "claude", "llm",
+    "openai", "anthropic", "deepmind", "google", "microsoft", "amazon", "meta", "apple", "nvidia", "intel", "github", "linux", "gpt", "gemini", "claude", "llm",
     "artificial intelligence", " ai ", "model", "research", "benchmark", "open source", "programming", "database", "cloud",
     "semiconductor", "cve", "vulnerability", "cybersecurity", "hiring", "layoff", "recruit", "workforce", "data scientist",
     "analytics", "funding", "acquisition", "earnings", "regulation", "robotics", "startup",
@@ -23,7 +23,7 @@ export function isUsefulHeadline(title: string) {
   if (!highSignal.some((term) => text.includes(term))) return false;
 
   if (/(hiring|layoff|recruit|workforce|headcount|jobs?)/.test(text)) {
-    const technicalContext = ["technology", "tech", "software", "developer", "engineer", "data", "cloud", "cyber", "computer", "robotics", "startup", "ai", "openai", "microsoft", "nvidia"];
+    const technicalContext = ["technology", "tech", "software", "developer", "engineer", "data", "cloud", "cyber", "computer", "robotics", "startup", "ai", "openai", "anthropic", "google", "microsoft", "amazon", "meta", "apple", "nvidia", "intel", "github"];
     if (!technicalContext.some((term) => term === "ai" ? /\bai\b/.test(text) : text.includes(term))) return false;
   }
   return true;

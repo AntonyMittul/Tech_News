@@ -4,7 +4,7 @@ import { enrichPendingArticles } from "./ai/enrich-pending";
 const focusedQueries = [
   '("new model" | "model release" | GPT | OpenAI | Anthropic | "Google DeepMind" | "Meta AI" | benchmark | "AI research" | "AI safety")',
   '("open source" | GitHub | Linux | Kubernetes | database | compiler | "programming language" | "cloud infrastructure" | semiconductor | "software engineering")',
-  '(hiring | layoffs | recruiting | recruitment | "workforce reduction" | headcount | "open roles")',
+  '("tech hiring" | "technology hiring" | "software engineer hiring" | "developer hiring" | "AI hiring" | "data scientist hiring" | "tech layoffs" | "technology layoffs" | "software layoffs" | "AI layoffs" | "workforce reduction" | "engineering headcount")',
   '("data science" | "data scientist" | analytics | statistics | "data platform")',
   '(CVE | "zero-day" | vulnerability | ransomware | "data breach" | cybersecurity | malware)',
   '(acquisition | funding | earnings | regulation | "tech company" | startup | valuation)',
