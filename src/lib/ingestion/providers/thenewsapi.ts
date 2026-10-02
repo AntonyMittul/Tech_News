@@ -20,6 +20,31 @@ function sourceUrl(source?: string) {
   return source.startsWith("http") ? source : `https://${source}`;
 }
 
+function relevanceScore(title: string, description?: string, source?: string) {
+  const text = `${title} ${description ?? ""}`.toLowerCase();
+  const highSignal = [
+    "openai", "anthropic", "google deepmind", "microsoft", "meta ai", "nvidia", "github", "linux", "gpt", "gemini", "claude", "llm",
+    "new model", "model release", "launches", "released", "research", "benchmark", "open source",
+    "api", "framework", "programming language", "database", "cloud infrastructure", "semiconductor",
+    "cve-", "zero-day", "vulnerability", "ransomware", "data breach", "layoffs", "hiring", "headcount",
+    "data science", "data scientist", "data pipeline", "acquisition", "funding", "earnings", "regulation",
+  ];
+  const lowSignal = [
+    "best ", "top ", "review", "deals", "sale", "discount", "sponsored", "founder-led sales", "meeting assistants",
+    "how to", "buying guide", "gift guide", "opinion", "podcast", "newsletter",
+  ];
+  const trustedSource = ["openai.com", "anthropic.com", "blog.google", "github.blog", "microsoft.com", "arstechnica.com", "theregister.com", "bleepingcomputer.com"];
+  const titleText = title.toLowerCase();
+  const titleSignals = highSignal.filter((term) => titleText.includes(term)).length;
+  const technicalTitleSignals = ["technology", "tech", "software", "developer", "engineer", "programming", "ai", "data", "cloud", "cyber", "computer", "robotics", "startup", "openai", "anthropic", "microsoft", "nvidia"].filter((term) => term.length <= 3 ? new RegExp(`\\b${term}\\b`).test(titleText) : titleText.includes(term)).length;
+  let score = highSignal.reduce((total, term) => total + (text.includes(term) ? 2 : 0), 0);
+  score -= lowSignal.reduce((total, term) => total + (text.includes(term) ? 3 : 0), 0);
+  if (trustedSource.some((domain) => source?.toLowerCase().includes(domain))) score += 2;
+  if (titleSignals === 0 && !trustedSource.some((domain) => source?.toLowerCase().includes(domain))) score -= 10;
+  if (/(hiring|layoff|recruit|workforce|headcount|jobs?)/.test(titleText) && technicalTitleSignals === 0) score -= 10;
+  return score;
+}
+
 export const theNewsApiProvider: NewsProvider = {
   name: "thenewsapi",
   async fetchArticles(input: FetchArticlesInput = {}) {
@@ -44,7 +69,7 @@ export const theNewsApiProvider: NewsProvider = {
 
     const response = await fetchJson<TheNewsApiResponse>(`https://api.thenewsapi.com/v1/news/top?${params}`);
 
-    return (response.data ?? []).map<NormalizedArticle>((item) => ({
+    return (response.data ?? []).filter((item) => relevanceScore(item.title, item.description, item.source) >= 2).map<NormalizedArticle>((item) => ({
       title: item.title,
       url: canonicalizeUrl(item.url),
       sourceName: item.source ?? "The News API",

@@ -3,10 +3,74 @@ import { and, count, desc, eq, ilike, inArray, ne, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { articleCategories, articleSummaries, articleTags, articles, categories, sources, tags } from "@/db/schema";
 import { decodeHtmlEntities } from "./ingestion/utils";
-import { pickCompleteSummary } from "./content-quality";
+import { isUsefulHeadline, pickCompleteSummary } from "./content-quality";
 
 function readableArticleFilter() {
   return sql`(
+    ${articles.title} NOT ILIKE '%best %'
+    AND ${articles.title} NOT ILIKE '%top %'
+    AND ${articles.title} NOT ILIKE '%deals%'
+    AND ${articles.title} NOT ILIKE '%sale%'
+    AND ${articles.title} NOT ILIKE '%buying guide%'
+    AND ${articles.title} NOT ILIKE '%gift guide%'
+    AND ${articles.title} NOT ILIKE '%podcast%'
+    AND ${articles.title} NOT ILIKE '%review%'
+    AND ${articles.title} NOT ILIKE '%sponsored%'
+    AND ${articles.title} NOT ILIKE '%discount%'
+    AND (
+      ${articles.title} ILIKE '%openai%'
+      OR ${articles.title} ILIKE '%anthropic%'
+      OR ${articles.title} ILIKE '%deepmind%'
+      OR ${articles.title} ILIKE '%microsoft%'
+      OR ${articles.title} ILIKE '%nvidia%'
+      OR ${articles.title} ILIKE '%github%'
+      OR ${articles.title} ILIKE '%linux%'
+      OR ${articles.title} ILIKE '%gpt%'
+      OR ${articles.title} ILIKE '%gemini%'
+      OR ${articles.title} ILIKE '%claude%'
+      OR ${articles.title} ILIKE '%llm%'
+      OR ${articles.title} ILIKE '% AI %'
+      OR ${articles.title} ILIKE 'AI%'
+      OR ${articles.title} ILIKE '% AI'
+      OR ${articles.title} ILIKE '%artificial intelligence%'
+      OR ${articles.title} ILIKE '%model%'
+      OR ${articles.title} ILIKE '%research%'
+      OR ${articles.title} ILIKE '%benchmark%'
+      OR ${articles.title} ILIKE '%open source%'
+      OR ${articles.title} ILIKE '%programming%'
+      OR ${articles.title} ILIKE '%database%'
+      OR ${articles.title} ILIKE '%cloud%'
+      OR ${articles.title} ILIKE '%semiconductor%'
+      OR ${articles.title} ILIKE '%cve%'
+      OR ${articles.title} ILIKE '%vulnerability%'
+      OR ${articles.title} ILIKE '%cybersecurity%'
+      OR ${articles.title} ILIKE '%hiring%'
+      OR ${articles.title} ILIKE '%layoff%'
+      OR ${articles.title} ILIKE '%recruit%'
+      OR ${articles.title} ILIKE '%workforce%'
+      OR ${articles.title} ILIKE '%data scientist%'
+      OR ${articles.title} ILIKE '%analytics%'
+      OR ${articles.title} ILIKE '%funding%'
+      OR ${articles.title} ILIKE '%acquisition%'
+      OR ${articles.title} ILIKE '%earnings%'
+      OR ${articles.title} ILIKE '%regulation%'
+    )
+    AND (
+      (${articles.title} NOT ILIKE '%hiring%' AND ${articles.title} NOT ILIKE '%jobs%' AND ${articles.title} NOT ILIKE '%layoff%' AND ${articles.title} NOT ILIKE '%workforce%')
+      OR ${articles.title} ILIKE '%technology%'
+      OR ${articles.title} ILIKE '%software%'
+      OR ${articles.title} ILIKE '%developer%'
+      OR ${articles.title} ILIKE '%engineer%'
+      OR ${articles.title} ILIKE '%data%'
+      OR ${articles.title} ILIKE '%cloud%'
+      OR ${articles.title} ILIKE '%cyber%'
+      OR ${articles.title} ILIKE '% AI %'
+      OR ${articles.title} ILIKE 'AI%'
+      OR ${articles.title} ILIKE '% AI'
+      OR ${articles.title} ILIKE '%robotics%'
+      OR ${articles.title} ILIKE '%startup%'
+    )
+    AND
     (${articleSummaries.summary} IS NOT NULL AND length(trim(${articleSummaries.summary})) >= 100 AND ${articleSummaries.summary} NOT LIKE '%...%' AND ${articleSummaries.summary} NOT LIKE '%…%')
     OR (${articles.description} IS NOT NULL AND length(trim(${articles.description})) >= 100 AND ${articles.description} NOT LIKE '%...%' AND ${articles.description} NOT LIKE '%…%')
     OR (${articles.contentExcerpt} IS NOT NULL AND length(trim(${articles.contentExcerpt})) >= 100 AND ${articles.contentExcerpt} NOT LIKE '%...%' AND ${articles.contentExcerpt} NOT LIKE '%…%')
@@ -58,7 +122,7 @@ export async function getArticles(input: ArticleQuery = {}) {
     .limit(limit + 1)
     .offset((page - 1) * limit);
 
-  const visibleRows = rows.slice(0, limit);
+  const visibleRows = rows.filter((article) => isUsefulHeadline(article.title)).slice(0, limit);
   const categoryRows = visibleRows.length
     ? await db
         .select({ articleId: articleCategories.articleId, name: categories.name })
@@ -150,6 +214,7 @@ export async function getArticleBySlug(slug: string) {
     .limit(1);
 
   if (!article) return undefined;
+  if (!isUsefulHeadline(article.title)) return undefined;
 
   const [categoryRows, tagRows] = await Promise.all([
     db
@@ -198,7 +263,7 @@ export async function getArticleBySlug(slug: string) {
     whyItMatters: decodeHtmlEntities(article.whyItMatters),
     categories: categoryRows,
     tags: tagRows,
-    related: related.map((item) => ({ ...item, title: decodeHtmlEntities(item.title) ?? item.title })),
+    related: related.filter((item) => isUsefulHeadline(item.title)).map((item) => ({ ...item, title: decodeHtmlEntities(item.title) ?? item.title })),
   };
 }
 
