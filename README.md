@@ -55,6 +55,8 @@ npm run refresh
 
 `npm run refresh` imports general technology, workforce, and data-science stories from the last 48 hours by default. It keeps the canonical URL/title deduplication rules, so rerunning it does not create repeated cards. Set `INGESTION_LOOKBACK_HOURS` in `.env.local` to change the window. For a daily local refresh, schedule `npm run refresh` once per day with Windows Task Scheduler or your operating system's scheduler.
 
+For a deployed application, the repository includes `.github/workflows/daily-refresh.yml`. Add `APP_URL` (the deployed app URL without a trailing slash) and `CRON_SECRET` as GitHub Actions repository secrets. The workflow calls the protected `/api/cron/refresh` endpoint daily, which imports focused technology, workforce, and data-science batches and attempts Gemini enrichment for pending articles.
+
 Classify existing stored articles and populate category/tag relations:
 
 ```bash
