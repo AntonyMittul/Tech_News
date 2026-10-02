@@ -147,16 +147,11 @@ export function NewsFeed() {
     fetch("/api/categories", { cache: "no-store" })
       .then((response) => response.json())
       .then((data: { categories: Category[] }) => {
-        const activeCategories = data.categories.filter(
-          (category) => category.articleCount > 0,
-        );
+        const activeCategories = data.categories;
         setCategories(activeCategories);
-        const stored = readPreference<string[]>(preferenceKeys.categories, []);
-        setPreferredCategories(
-          stored.length
-            ? stored
-            : activeCategories.map((category) => category.slug),
-        );
+        const allCategorySlugs = activeCategories.map((category) => category.slug);
+        setPreferredCategories(allCategorySlugs);
+        writePreference(preferenceKeys.categories, allCategorySlugs);
       })
       .catch(() => setError("Categories could not be loaded."));
   }, []);
