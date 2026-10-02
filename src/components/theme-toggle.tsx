@@ -30,13 +30,14 @@ export function ThemeToggle() {
 
   return (
     <button
-      className="focus-ring border border-[var(--line)] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] transition hover:border-[var(--cyan)] hover:text-[var(--cyan)]"
+      className="focus-ring flex h-10 w-10 items-center justify-center border border-[var(--line)] font-mono text-lg leading-none text-[var(--muted)] transition hover:border-[var(--cyan)] hover:text-[var(--cyan)]"
       type="button"
       aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+      title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
       aria-pressed={theme === "light"}
       onClick={toggleTheme}
     >
-      {theme === "dark" ? "[ light mode ]" : "[ dark mode ]"}
+      <span aria-hidden="true">{theme === "dark" ? "☼" : "☾"}</span>
     </button>
   );
 }
