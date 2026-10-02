@@ -1,8 +1,17 @@
-import { and, count, desc, eq, ilike, inArray, ne, or } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, ne, or, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { articleCategories, articleSummaries, articleTags, articles, categories, sources, tags } from "@/db/schema";
 import { decodeHtmlEntities } from "./ingestion/utils";
+import { pickCompleteSummary } from "./content-quality";
+
+function readableArticleFilter() {
+  return sql`(
+    (${articleSummaries.summary} IS NOT NULL AND length(trim(${articleSummaries.summary})) >= 100 AND ${articleSummaries.summary} NOT LIKE '%...%' AND ${articleSummaries.summary} NOT LIKE '%…%')
+    OR (${articles.description} IS NOT NULL AND length(trim(${articles.description})) >= 100 AND ${articles.description} NOT LIKE '%...%' AND ${articles.description} NOT LIKE '%…%')
+    OR (${articles.contentExcerpt} IS NOT NULL AND length(trim(${articles.contentExcerpt})) >= 100 AND ${articles.contentExcerpt} NOT LIKE '%...%' AND ${articles.contentExcerpt} NOT LIKE '%…%')
+  )`;
+}
 
 export type ArticleQuery = {
   page?: number;
@@ -15,7 +24,7 @@ export type ArticleQuery = {
 export async function getArticles(input: ArticleQuery = {}) {
   const page = Math.max(input.page ?? 1, 1);
   const limit = Math.min(Math.max(input.limit ?? 20, 1), 50);
-  const filters = [ne(articles.status, "hidden")];
+  const filters = [ne(articles.status, "hidden"), readableArticleFilter()];
 
   if (input.query) {
     filters.push(or(ilike(articles.title, `%${input.query}%`), ilike(articles.description, `%${input.query}%`))!);
@@ -79,7 +88,7 @@ export async function getArticles(input: ArticleQuery = {}) {
         imageUrl: article.imageUrl,
         description,
         readTimeMinutes: article.readTimeMinutes,
-        summary: decodeHtmlEntities(article.summary) || description || contentExcerpt || "Read the original source for the complete report.",
+        summary: pickCompleteSummary(decodeHtmlEntities(article.summary), description, contentExcerpt) ?? "Read the original source for the complete report.",
         status: article.status,
         categories: categoryMap.get(article.id) ?? [],
       };
@@ -137,7 +146,7 @@ export async function getArticleBySlug(slug: string) {
     .from(articles)
     .innerJoin(sources, eq(articles.sourceId, sources.id))
     .leftJoin(articleSummaries, eq(articleSummaries.articleId, articles.id))
-    .where(and(eq(articles.slug, slug), ne(articles.status, "hidden")))
+    .where(and(eq(articles.slug, slug), ne(articles.status, "hidden"), readableArticleFilter()))
     .limit(1);
 
   if (!article) return undefined;
@@ -173,7 +182,8 @@ export async function getArticleBySlug(slug: string) {
         })
         .from(articles)
         .innerJoin(sources, eq(articles.sourceId, sources.id))
-        .where(and(inArray(articles.id, relatedIds.map((row) => row.articleId)), ne(articles.status, "hidden")))
+        .leftJoin(articleSummaries, eq(articleSummaries.articleId, articles.id))
+        .where(and(inArray(articles.id, relatedIds.map((row) => row.articleId)), ne(articles.status, "hidden"), readableArticleFilter()))
         .orderBy(desc(articles.publishedAt))
         .limit(4)
     : [];
@@ -183,7 +193,7 @@ export async function getArticleBySlug(slug: string) {
     title: decodeHtmlEntities(article.title) ?? article.title,
     description: decodeHtmlEntities(article.description),
     contentExcerpt: decodeHtmlEntities(article.contentExcerpt),
-    summary: decodeHtmlEntities(article.summary),
+    summary: pickCompleteSummary(decodeHtmlEntities(article.summary), decodeHtmlEntities(article.description), decodeHtmlEntities(article.contentExcerpt)),
     keyPoints: article.keyPoints?.map((point) => decodeHtmlEntities(point) ?? point) ?? null,
     whyItMatters: decodeHtmlEntities(article.whyItMatters),
     categories: categoryRows,
@@ -203,7 +213,8 @@ export async function getCategories() {
     })
     .from(categories)
     .leftJoin(articleCategories, eq(articleCategories.categoryId, categories.id))
-    .leftJoin(articles, and(eq(articleCategories.articleId, articles.id), ne(articles.status, "hidden")))
+    .leftJoin(articleSummaries, eq(articleSummaries.articleId, articleCategories.articleId))
+    .leftJoin(articles, and(eq(articleCategories.articleId, articles.id), ne(articles.status, "hidden"), readableArticleFilter()))
     .groupBy(categories.id)
     .orderBy(categories.sortOrder);
 }

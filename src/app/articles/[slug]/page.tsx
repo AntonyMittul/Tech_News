@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BookmarkButton, MarkArticleRead } from "@/components/bookmark-button";
 import { getArticleBySlug } from "@/lib/news";
+import { pickCompleteSummary } from "@/lib/content-quality";
 
 export const dynamic = "force-dynamic";
 
@@ -28,14 +29,14 @@ function formatTextBlocks(value: string) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const article = await getArticleBySlug(slug);
-  return article ? { title: article.title, description: article.summary ?? article.description ?? "Technology news article" } : { title: "Article not found" };
+  return article ? { title: article.title, description: pickCompleteSummary(article.summary, article.description, article.contentExcerpt) ?? "Technology news article" } : { title: "Article not found" };
 }
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const article = await getArticleBySlug(slug);
   if (!article) notFound();
-  const summaryText = [article.summary, article.description, article.contentExcerpt].find((value) => Boolean(value?.trim())) ?? "The source did not provide a summary. Read the original article for the complete report.";
+  const summaryText = pickCompleteSummary(article.summary, article.description, article.contentExcerpt) ?? "The source did not provide a complete summary. Read the original article for the complete report.";
   const summaryBlocks = formatTextBlocks(summaryText);
 
   const bookmarkArticle = { id: article.id, slug: article.slug, title: article.title, url: article.url, sourceName: article.sourceName, publishedAt: article.publishedAt.toISOString(), imageUrl: article.imageUrl, description: article.description ?? null, summary: article.summary ?? null, readTimeMinutes: article.readTimeMinutes, categories: article.categories.map((category) => category.name) };
