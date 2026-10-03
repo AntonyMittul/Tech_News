@@ -1,34 +1,34 @@
 @import "tailwindcss";
 
 :root {
-  --background: #080a0f;
-  --foreground: #e5f7f2;
-  --panel: #0d121a;
-  --panel-raised: #111923;
-  --line: #20303a;
-  --muted: #81949d;
-  --cyan: #45f4d1;
-  --pink: #ff4fa3;
-  --amber: #ffc857;
+  --background: #050914;
+  --foreground: #f1f5f9;
+  --panel: #0a1122;
+  --panel-raised: #131e36;
+  --line: #1c2b4b;
+  --muted: #64748b;
+  --cyan: #00f0ff;
+  --pink: #ff2a85;
+  --amber: #f59e0b;
 }
 
 :root[data-theme="light"] {
-  --background: #eef7f5;
-  --foreground: #102126;
+  --background: #f8fafc;
+  --foreground: #0f172a;
   --panel: #ffffff;
-  --panel-raised: #e4f0ee;
-  --line: #c1d9d5;
-  --muted: #527078;
-  --cyan: #005a52;
-  --pink: #b81c6a;
-  --amber: #945900;
+  --panel-raised: #e2e8f0;
+  --line: #cbd5e1;
+  --muted: #64748b;
+  --cyan: #0891b2;
+  --pink: #db2777;
+  --amber: #d97706;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Arial", "Helvetica Neue", sans-serif;
-  --font-mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  --font-sans: var(--font-inter), "Arial", sans-serif;
+  --font-mono: var(--font-jetbrains), "Cascadia Code", monospace;
 }
 
 * {
@@ -42,7 +42,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica Neue, sans-serif;
+  font-family: var(--font-sans);
   min-width: 320px;
 }
 
@@ -79,11 +79,11 @@ a {
 }
 
 .text-glow {
-  text-shadow: 0 0 24px color-mix(in srgb, var(--cyan) 24%, transparent);
+  text-shadow: 0 0 20px color-mix(in srgb, var(--cyan) 40%, transparent);
 }
 
 .panel-glow {
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cyan) 8%, transparent), 0 16px 50px color-mix(in srgb, #000 20%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cyan) 15%, transparent), 0 8px 30px color-mix(in srgb, var(--cyan) 8%, transparent);
 }
 
 .focus-ring:focus-visible {

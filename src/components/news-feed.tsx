@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { Search, ExternalLink, CircleAlert, Inbox, Loader2 } from "lucide-react";
 
 import { BookmarkButton } from "@/components/bookmark-button";
 import {
@@ -236,15 +237,18 @@ export function NewsFeed() {
           <label className="sr-only" htmlFor="news-search">
             Search technology news
           </label>
-          <input
-            id="news-search"
-            className="focus-ring min-w-0 flex-1 border border-[var(--line)] bg-[var(--panel)] px-4 py-3 font-mono text-xs text-[var(--foreground)] placeholder:text-[var(--muted)]"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search the live signal..."
-          />
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted)]" />
+            <input
+              id="news-search"
+              className="focus-ring w-full border border-[var(--line)] bg-[var(--panel)]/50 backdrop-blur-sm pl-11 pr-4 py-3 font-mono text-xs text-[var(--foreground)] placeholder:text-[var(--muted)] transition-colors focus:bg-[var(--panel)]"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search the live signal..."
+            />
+          </div>
           <button
-            className="focus-ring border border-[var(--cyan)] bg-[var(--cyan)] px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--background)] transition hover:brightness-110"
+            className="focus-ring border border-[var(--cyan)] bg-[var(--cyan)]/10 text-[var(--cyan)] hover:bg-[var(--cyan)] hover:text-[var(--background)] px-6 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.14em] transition-all duration-300 shadow-[0_0_15px_rgba(0,240,255,0.15)] hover:shadow-[0_0_25px_rgba(0,240,255,0.4)]"
             type="submit"
           >
             Search
@@ -267,25 +271,29 @@ export function NewsFeed() {
 
         {error ? (
           <div
-            className="border border-[var(--pink)]/60 bg-[var(--panel)] p-6"
+            className="flex items-start gap-4 border border-[var(--pink)]/40 bg-[var(--pink)]/5 p-6 backdrop-blur-sm"
             role="alert"
           >
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--pink)]">
-              Feed error
-            </p>
-            <p className="mt-3 text-sm text-[var(--foreground)]">{error}</p>
-            <button
-              className="focus-ring mt-4 border border-[var(--line)] px-3 py-2 font-mono text-[10px] uppercase text-[var(--muted)]"
-              type="button"
-              onClick={() => void loadArticles(1)}
-            >
-              Retry
-            </button>
+            <CircleAlert className="w-5 h-5 text-[var(--pink)] shrink-0 mt-0.5" />
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--pink)]">
+                Feed error
+              </p>
+              <p className="mt-2 text-sm text-[var(--foreground)]">{error}</p>
+              <button
+                className="focus-ring mt-4 border border-[var(--pink)]/30 hover:border-[var(--pink)]/80 hover:bg-[var(--pink)]/10 px-4 py-2 font-mono text-[10px] uppercase text-[var(--pink)] transition-colors"
+                type="button"
+                onClick={() => void loadArticles(1)}
+              >
+                Retry Connection
+              </button>
+            </div>
           </div>
         ) : null}
         {loading ? <LoadingCards /> : null}
         {!loading && !error && visibleArticles.length === 0 ? (
-          <div className="panel-glow border border-dashed border-[var(--line)] bg-[var(--panel)] p-10 text-center">
+          <div className="panel-glow flex flex-col items-center justify-center border border-dashed border-[var(--line)] bg-[var(--panel)]/40 p-16 text-center backdrop-blur-sm">
+            <Inbox className="w-12 h-12 text-[var(--cyan)]/50 mb-6" />
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--cyan)]">
               No matching local records
             </p>
@@ -309,7 +317,7 @@ export function NewsFeed() {
             {visibleArticles.map((article, index) => (
               <article
                 key={article.id}
-                className="panel-glow group grid gap-5 border border-[var(--line)] bg-[var(--panel)] p-5 transition hover:border-[var(--cyan)]/50 sm:grid-cols-[150px_1fr] lg:grid-cols-[190px_1fr]"
+                className="panel-glow group grid gap-5 border border-white/5 bg-[var(--panel)]/60 backdrop-blur-md p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--cyan)]/40 hover:shadow-[0_8px_30px_rgba(0,240,255,0.1)] sm:grid-cols-[150px_1fr] lg:grid-cols-[190px_1fr]"
               >
                 <div className="relative min-h-32 overflow-hidden border border-white/10 bg-gradient-to-br from-cyan-950 via-[#0b2930] to-[#14201d]">
                   {article.imageUrl ? (
@@ -366,12 +374,12 @@ export function NewsFeed() {
                     <div className="flex items-center gap-3">
                       <BookmarkButton article={article} />
                       <a
-                        className="text-[var(--cyan)]"
+                        className="flex items-center gap-1 text-[var(--cyan)] hover:text-white transition-colors"
                         href={article.url}
                         target="_blank"
                         rel="noreferrer"
                       >
-                        Original source ↗
+                        Original source <ExternalLink className="w-3 h-3" />
                       </a>
                     </div>
                   </div>
@@ -383,12 +391,18 @@ export function NewsFeed() {
 
         {hasMore && !savedOnly && !loading && !error ? (
           <button
-            className="focus-ring mt-6 w-full border border-[var(--line)] bg-[var(--panel)] py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-[var(--cyan)] hover:text-[var(--cyan)]"
+            className="focus-ring mt-8 flex w-full items-center justify-center gap-2 border border-white/10 bg-[var(--panel)]/40 backdrop-blur-md py-4 font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition-all hover:border-[var(--cyan)]/50 hover:bg-[var(--cyan)]/5 hover:text-[var(--cyan)] hover:shadow-[0_0_20px_rgba(0,240,255,0.15)]"
             type="button"
             disabled={loadingMore}
             onClick={() => void loadArticles(page + 1, true)}
           >
-            {loadingMore ? "Loading more signals..." : "Load more signals ↓"}
+            {loadingMore ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Loading more signals...
+              </>
+            ) : (
+              "Load more signals ↓"
+            )}
           </button>
         ) : null}
       </div>

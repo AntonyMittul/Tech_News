@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SavedArticlesButton } from "@/components/saved-articles-button";
 import { BookmarkButton, MarkArticleRead } from "@/components/bookmark-button";
+import { ChevronLeft, ExternalLink, List, Clock } from "lucide-react";
 import { getArticleBySlug } from "@/lib/news";
 import { pickCompleteSummary } from "@/lib/content-quality";
 
@@ -106,20 +107,20 @@ export default async function ArticlePage({
             <SavedArticlesButton />
             <ThemeToggle />
             <Link
-              className="focus-ring border border-[var(--line)] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] transition hover:border-[var(--cyan)] hover:text-[var(--cyan)]"
+              className="focus-ring flex items-center gap-2 border border-[var(--line)] bg-[var(--panel)]/50 backdrop-blur-sm px-4 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] transition hover:border-[var(--cyan)] hover:text-[var(--cyan)]"
               href="/"
             >
-              [ back to feed ]
+              <List className="w-3 h-3" /> Back to feed
             </Link>
           </div>
         </div>
       </header>
       <main className="relative z-10 mx-auto max-w-[1200px] px-5 py-8 lg:px-8 lg:py-14">
         <Link
-          className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--cyan)]"
+          className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--cyan)] hover:text-white transition-colors"
           href="/"
         >
-          ← All live signals
+          <ChevronLeft className="w-4 h-4" /> All live signals
         </Link>
         <article className="mt-8">
           <div className="grid gap-8 lg:grid-cols-[1fr_300px] lg:items-start">
@@ -130,8 +131,8 @@ export default async function ArticlePage({
                   {formatPublishedAt(article.publishedAt)}
                 </span>
                 {article.readTimeMinutes ? (
-                  <span className="text-[var(--muted)]">
-                    {article.readTimeMinutes} min read
+                  <span className="flex items-center gap-1 text-[var(--muted)]">
+                    <Clock className="w-3 h-3" /> {article.readTimeMinutes} min read
                   </span>
                 ) : null}
               </div>
@@ -160,19 +161,19 @@ export default async function ArticlePage({
             </div>
             {article.imageUrl ? (
               <div
-                className="min-h-52 border border-[var(--line)] bg-cover bg-center panel-glow"
+                className="min-h-52 border border-[var(--line)] bg-[var(--panel)] bg-cover bg-center panel-glow"
                 style={{ backgroundImage: `url(${article.imageUrl})` }}
                 aria-label="Article image"
               />
             ) : (
-              <div className="flex min-h-52 items-center justify-center border border-[var(--line)] bg-[var(--panel)] font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">
+              <div className="flex min-h-52 items-center justify-center border border-white/5 bg-[var(--panel)]/60 backdrop-blur-sm font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">
                 No image available
               </div>
             )}
           </div>
           <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_300px]">
             <div className="space-y-8">
-              <section className="border border-[var(--line)] bg-[var(--panel)] p-6 panel-glow">
+              <section className="border border-white/5 bg-[var(--panel)]/60 backdrop-blur-sm p-6 panel-glow">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--cyan)]">
                   Summary
                 </p>
@@ -186,7 +187,7 @@ export default async function ArticlePage({
                 </ul>
               </section>
               {article.keyPoints?.length ? (
-                <section className="border border-[var(--line)] bg-[var(--panel)] p-6">
+                <section className="border border-white/5 bg-[var(--panel)]/60 backdrop-blur-sm p-6 transition-all hover:border-[var(--cyan)]/20">
                   <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--cyan)]">
                     Key points
                   </p>
@@ -201,7 +202,7 @@ export default async function ArticlePage({
                 </section>
               ) : null}
               {article.whyItMatters ? (
-                <section className="border border-[var(--line)] bg-[var(--panel)] p-6">
+                <section className="border border-white/5 bg-[var(--panel)]/60 backdrop-blur-sm p-6 transition-all hover:border-[var(--cyan)]/20">
                   <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--cyan)]">
                     Why it matters
                   </p>
@@ -211,16 +212,16 @@ export default async function ArticlePage({
                 </section>
               ) : null}
               <a
-                className="focus-ring inline-flex border border-[var(--cyan)] bg-[var(--cyan)] px-5 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--background)] transition hover:brightness-110"
+                className="focus-ring inline-flex w-fit items-center gap-2 border border-[var(--cyan)] bg-[var(--cyan)]/10 px-6 py-4 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--cyan)] transition-all hover:bg-[var(--cyan)] hover:text-[var(--background)] shadow-[0_0_15px_rgba(0,240,255,0.1)] hover:shadow-[0_0_25px_rgba(0,240,255,0.3)]"
                 href={article.url}
                 target="_blank"
                 rel="noreferrer"
               >
-                Read original article ↗
+                Read original article <ExternalLink className="w-4 h-4" />
               </a>
             </div>
             <aside className="space-y-5">
-              <section className="border border-[var(--line)] bg-[var(--panel)] p-5">
+              <section className="border border-white/5 bg-[var(--panel)]/60 backdrop-blur-sm p-5">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--cyan)]">
                   Source
                 </p>
@@ -232,7 +233,7 @@ export default async function ArticlePage({
                 </p>
               </section>
               {article.related.length ? (
-                <section className="border border-[var(--line)] bg-[var(--panel)] p-5">
+                <section className="border border-white/5 bg-[var(--panel)]/60 backdrop-blur-sm p-5">
                   <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--cyan)]">
                     Related articles
                   </p>

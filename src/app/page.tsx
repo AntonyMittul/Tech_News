@@ -16,7 +16,7 @@ export default function Home() {
   return (
     <div className="signal-grid relative min-h-screen overflow-hidden bg-[var(--background)]">
       <div className="scanlines absolute inset-0 z-0 opacity-50" />
-      <header className="relative z-10 border-b border-[var(--line)] bg-[var(--background)]/90 backdrop-blur-md">
+      <header className="relative z-10 border-b border-[var(--line)] bg-[var(--background)]/70 backdrop-blur-xl transition-all">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-6 px-5 py-4 lg:px-8">
           <div className="flex items-center gap-3">
             <SignalMark />
@@ -48,10 +48,10 @@ export default function Home() {
             <p className="mb-4 font-mono text-xs uppercase tracking-[0.26em] text-[var(--cyan)]">
               {"// curated intelligence feed"}
             </p>
-            <h1 className="text-glow max-w-4xl text-4xl font-bold leading-[0.98] tracking-[-0.05em] text-[var(--foreground)] sm:text-6xl lg:text-7xl">
+            <h1 className="text-glow max-w-4xl text-4xl font-bold leading-[0.98] tracking-[-0.05em] text-transparent bg-clip-text bg-gradient-to-br from-[var(--foreground)] to-[var(--muted)] sm:text-6xl lg:text-7xl">
               The signal beneath
               <br />
-              <span className="text-[var(--cyan)]">the noise.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-br from-[var(--cyan)] to-[var(--cyan)]/50">the noise.</span>
             </h1>
             <p className="mt-5 max-w-xl text-sm leading-7 text-[var(--muted)] sm:text-base">
               Real technology news collected from configured sources and stored
