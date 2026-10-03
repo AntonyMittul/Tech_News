@@ -78,9 +78,7 @@ a {
   pointer-events: none;
 }
 
-.text-glow {
-  text-shadow: 0 0 20px color-mix(in srgb, var(--cyan) 40%, transparent);
-}
+
 
 .panel-glow {
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--cyan) 15%, transparent), 0 8px 30px color-mix(in srgb, var(--cyan) 8%, transparent);
