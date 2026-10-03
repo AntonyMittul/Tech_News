@@ -25,7 +25,7 @@ ByteBrief is a curated intelligence dashboard that aggregates real technology ne
 ### 2. Environment Variables
 Create a `.env.local` file in the root directory:
 ```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/signal"
+DATABASE_URL="postgresql://signal:signal@localhost:5433/tech_news"
 GEMINI_API_KEY="your-gemini-api-key"
 CRON_SECRET="your-secure-random-string"
 ```
