@@ -19,9 +19,9 @@
   --panel-raised: #e4f0ee;
   --line: #c1d9d5;
   --muted: #527078;
-  --cyan: #007d70;
-  --pink: #c52b78;
-  --amber: #a46300;
+  --cyan: #005a52;
+  --pink: #b81c6a;
+  --amber: #945900;
 }
 
 @theme inline {

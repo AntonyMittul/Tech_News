@@ -3,8 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Signal // Tech Intelligence",
-    template: "%s | Signal",
+    default: "ByteBrief // Tech Intelligence",
+    template: "%s | ByteBrief",
   },
   description:
     "A focused intelligence dashboard for technology and computer science news.",

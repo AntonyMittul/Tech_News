@@ -22,7 +22,7 @@ export default function Home() {
             <SignalMark />
             <div>
               <p className="font-mono text-sm font-bold tracking-[0.2em] text-[var(--foreground)]">
-                SIGNAL
+                BYTEBRIEF
               </p>
               <p className="font-mono text-[9px] tracking-[0.16em] text-[var(--muted)]">
                 TECH INTELLIGENCE / LIVE
@@ -58,19 +58,7 @@ export default function Home() {
               locally for a focused reading experience.
             </p>
           </div>
-          <div className="w-full max-w-sm border border-[var(--line)] bg-[var(--panel)] p-4 panel-glow">
-            <div className="mb-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">
-              <span>Live feed</span>
-              <span className="text-[var(--cyan)]">SOURCE LINKED</span>
-            </div>
-            <div className="h-1 bg-[var(--panel-raised)]">
-              <div className="h-full w-full bg-[var(--cyan)] shadow-[0_0_12px_var(--cyan)]" />
-            </div>
-            <div className="mt-3 flex justify-between font-mono text-[10px] text-[var(--muted)]">
-              <span>Search / filter / paginate</span>
-              <span className="text-[var(--foreground)]">Ready</span>
-            </div>
-          </div>
+
         </section>
         <NewsFeed />
       </main>

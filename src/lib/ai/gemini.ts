@@ -11,6 +11,14 @@ const enrichmentSchema = z.object({
 
 export type ArticleEnrichment = z.infer<typeof enrichmentSchema>;
 
+export function validateEnrichment(value: unknown) {
+  const enrichment = enrichmentSchema.parse(value);
+  if (!isCompleteSummary(enrichment.summary)) {
+    throw new Error("Gemini returned an incomplete summary");
+  }
+  return enrichment;
+}
+
 const responseSchema = {
   type: Type.OBJECT,
   properties: {
@@ -63,7 +71,5 @@ export async function enrichArticle(input: {
 
   const text = response.text;
   if (!text) throw new Error("Gemini returned an empty response");
-  const enrichment = enrichmentSchema.parse(JSON.parse(text));
-  if (!isCompleteSummary(enrichment.summary)) throw new Error("Gemini returned an incomplete summary");
-  return enrichment;
+  return validateEnrichment(JSON.parse(text));
 }

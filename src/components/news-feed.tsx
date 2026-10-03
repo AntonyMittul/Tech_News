@@ -51,7 +51,7 @@ function formatPublishedAt(value: string) {
 
 function LoadingCards() {
   return (
-    <div className="space-y-4" aria-label="Loading articles" aria-busy="true">
+    <div role="status" className="space-y-4" aria-label="Loading articles" aria-busy="true">
       {[1, 2, 3].map((item) => (
         <div
           key={item}

@@ -95,7 +95,7 @@ export default async function ArticlePage({
             <SignalMark />
             <div>
               <p className="font-mono text-sm font-bold tracking-[0.2em] text-[var(--foreground)]">
-                SIGNAL
+                BYTEBRIEF
               </p>
               <p className="font-mono text-[9px] tracking-[0.16em] text-[var(--muted)]">
                 TECH INTELLIGENCE / ARTICLE
