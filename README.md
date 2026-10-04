@@ -30,22 +30,31 @@ GEMINI_API_KEY="your-gemini-api-key"
 CRON_SECRET="your-secure-random-string"
 ```
 
-### 3. Installation & Database Setup
+### 3. Running with Docker (Recommended)
+To run the entire application (Database + Frontend) exactly the same way it runs in production, use Docker Compose:
 ```bash
-# Install dependencies
-npm install
+docker-compose up --build
+```
+The app will be available at `http://localhost:3000`.
 
-# Start local Postgres instance via Docker
+### 4. Running Locally (Without Dockerizing the Frontend)
+If you prefer to run the Node server on your host machine for development:
+```bash
+# Start only the Postgres instance
 npm run db:up
 
-# Apply schema migrations
-npm run db:migrate
+# Start the Next.js dev server
+npm run dev
+```
 
-# Seed the initial categories
+### 5. Database Initialization (First Time Setup)
+If this is your first time starting the database, run these commands to set up the tables and initial seed data:
+```bash
+npm run db:migrate
 npm run db:seed
 ```
 
-### 4. Fetching the Initial Data
+### 6. Fetching the Initial Data
 To populate the database with the latest articles:
 ```bash
 # Fetch raw articles from Hacker News (or other providers)
