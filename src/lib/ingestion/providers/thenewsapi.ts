@@ -59,7 +59,7 @@ export const theNewsApiProvider: NewsProvider = {
       categories: "tech",
       language: "en",
       sort: "published_on",
-      limit: String(clampLimit(input.limit, 10)),
+      limit: String(clampLimit(input.limit, 50)),
       search,
       search_fields: "title,description,keywords",
     });
@@ -69,7 +69,7 @@ export const theNewsApiProvider: NewsProvider = {
 
     const response = await fetchJson<TheNewsApiResponse>(`https://api.thenewsapi.com/v1/news/top?${params}`);
 
-    return (response.data ?? []).filter((item) => relevanceScore(item.title, item.description, item.source) >= 2).map<NormalizedArticle>((item) => ({
+    return (response.data ?? []).filter((item) => relevanceScore(item.title, item.description, item.source) >= 0).map<NormalizedArticle>((item) => ({
       title: item.title,
       url: canonicalizeUrl(item.url),
       sourceName: item.source ?? "The News API",

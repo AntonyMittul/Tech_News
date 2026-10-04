@@ -1,5 +1,5 @@
 import type { FetchArticlesInput, NewsProvider, NormalizedArticle } from "../types";
-import { clampLimit, fetchJson, parseDate, stripHtml } from "../utils";
+import { clampLimit, fetchJson, parseDate, stripHtml, extractOgImage } from "../utils";
 
 type HackerNewsItem = {
   id: number;
@@ -24,19 +24,24 @@ export const hackerNewsProvider: NewsProvider = {
       ids.slice(0, limit * 2).map((id) => fetchJson<HackerNewsItem>(`${baseUrl}/item/${id}.json`)),
     );
 
-    return stories
+    const validStories = stories
       .filter((item) => item && item.type === "story" && item.title && item.url && !item.dead && !item.deleted)
-      .slice(0, limit)
-      .map<NormalizedArticle>((item) => ({
-        title: stripHtml(item.title) ?? "Untitled Hacker News story",
-        url: item.url!,
-        sourceName: "Hacker News",
-        sourceUrl: "https://news.ycombinator.com",
-        publishedAt: parseDate(item.time ? item.time * 1000 : undefined),
-        author: item.by,
-        description: stripHtml(item.text),
-        language: "en",
-        externalId: String(item.id),
-      }));
+      .slice(0, limit);
+
+    // Fetch Open Graph images for all valid stories concurrently
+    const ogImages = await Promise.all(validStories.map((item) => extractOgImage(item.url!)));
+
+    return validStories.map<NormalizedArticle>((item, index) => ({
+      title: stripHtml(item.title) ?? "Untitled Hacker News story",
+      url: item.url!,
+      sourceName: "Hacker News",
+      sourceUrl: "https://news.ycombinator.com",
+      publishedAt: parseDate(item.time ? item.time * 1000 : undefined),
+      author: item.by,
+      imageUrl: ogImages[index], // Use the dynamically fetched OG image
+      description: stripHtml(item.text),
+      language: "en",
+      externalId: String(item.id),
+    }));
   },
 };

@@ -79,3 +79,37 @@ export function parseDate(value?: string | number | Date) {
   const date = value instanceof Date ? value : new Date(value ?? Date.now());
   return Number.isNaN(date.getTime()) ? new Date() : date;
 }
+
+export async function extractOgImage(url: string): Promise<string | undefined> {
+  try {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const response = await fetch(url, { 
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+      }
+    });
+    clearTimeout(id);
+    
+    if (!response.ok) return undefined;
+    
+    // We only need the first chunk of HTML (head tag) to find meta tags, but for simplicity we get text
+    const html = await response.text();
+    
+    // Regex to match og:image or twitter:image
+    const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) 
+                 || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+                 
+    if (ogMatch && ogMatch[1]) return ogMatch[1];
+    
+    const twitterMatch = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i)
+                      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i);
+                      
+    if (twitterMatch && twitterMatch[1]) return twitterMatch[1];
+    
+    return undefined;
+  } catch (error) {
+    return undefined; // Ignore timeouts and fetch errors
+  }
+}
