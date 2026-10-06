@@ -1,5 +1,6 @@
 import { runIngestion } from "./ingestion";
 import { enrichPendingArticles } from "./ai/enrich-pending";
+import { classifyStoredArticles } from "./classify-articles";
 
 const focusedQueries = [
   '("new model" | "model release" | GPT | OpenAI | Anthropic | "Google DeepMind" | "Meta AI" | benchmark | "AI research" | "AI safety")',
@@ -19,6 +20,10 @@ export async function refreshLiveNews() {
   for (const query of focusedQueries) {
     ingestion.push(await runIngestion("thenewsapi", { limit, query, publishedAfter }));
   }
+  
+  ingestion.push(await runIngestion("hacker-news", { limit: limit * 2 }));
+
+  await classifyStoredArticles();
 
   const enrichment = await enrichPendingArticles(Number(process.env.ENRICHMENT_LIMIT ?? "5"));
   return { ingestion, enrichment };
