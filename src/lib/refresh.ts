@@ -20,8 +20,6 @@ export async function refreshLiveNews() {
   for (const query of focusedQueries) {
     ingestion.push(await runIngestion("thenewsapi", { limit, query, publishedAfter }));
   }
-  
-  ingestion.push(await runIngestion("hacker-news", { limit: limit * 2 }));
 
   await classifyStoredArticles();
 
