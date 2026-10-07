@@ -1,4 +1,4 @@
-import { eq, ne } from "drizzle-orm";
+import { desc, eq, ne } from "drizzle-orm";
 
 import { db } from "@/db";
 import { articleSummaries, articles, sources } from "@/db/schema";
@@ -24,7 +24,7 @@ export async function enrichPendingArticles(requestedLimit = 5) {
     .innerJoin(sources, eq(articles.sourceId, sources.id))
     .leftJoin(articleSummaries, eq(articleSummaries.articleId, articles.id))
     .where(ne(articles.status, "hidden"))
-    .orderBy(articles.publishedAt)
+    .orderBy(desc(articles.publishedAt))
     .limit(100);
 
   const candidates = pendingArticles.filter((article) => !isCompleteSummary(article.existingSummary)).slice(0, limit);

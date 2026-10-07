@@ -18,7 +18,11 @@ export async function refreshLiveNews() {
   const ingestion = [];
 
   for (const query of focusedQueries) {
-    ingestion.push(await runIngestion("thenewsapi", { limit, query, publishedAfter }));
+    try {
+      ingestion.push(await runIngestion("thenewsapi", { limit, query, publishedAfter }));
+    } catch (error) {
+      console.error(`Ingestion failed for query ${query}:`, error);
+    }
   }
 
   await classifyStoredArticles();
