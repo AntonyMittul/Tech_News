@@ -17,12 +17,11 @@ export async function refreshLiveNews() {
   const limit = Number(process.env.INGESTION_LIMIT ?? "10");
   const ingestion = [];
 
-  for (const query of focusedQueries) {
-    try {
-      ingestion.push(await runIngestion("thenewsapi", { limit, query, publishedAfter }));
-    } catch (error) {
-      console.error(`Ingestion failed for query ${query}:`, error);
-    }
+  const combinedQuery = focusedQueries.join(" | ");
+  try {
+    ingestion.push(await runIngestion("thenewsapi", { limit: limit * 5, query: combinedQuery, publishedAfter }));
+  } catch (error) {
+    console.error("Ingestion failed:", error);
   }
 
   await classifyStoredArticles();

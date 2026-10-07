@@ -67,7 +67,7 @@ export const theNewsApiProvider: NewsProvider = {
       params.set("published_after", input.publishedAfter.toISOString().replace(/\.\d{3}Z$/, ""));
     }
 
-    const response = await fetchJson<TheNewsApiResponse>(`https://api.thenewsapi.com/v1/news/top?${params}`);
+    const response = await fetchJson<TheNewsApiResponse>(`https://api.thenewsapi.com/v1/news/all?${params}`);
 
     return (response.data ?? []).filter((item) => relevanceScore(item.title, item.description, item.source) >= 0).map<NormalizedArticle>((item) => ({
       title: item.title,
