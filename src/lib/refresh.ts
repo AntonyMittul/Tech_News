@@ -19,7 +19,7 @@ export async function refreshLiveNews() {
 
   const combinedQuery = focusedQueries.join(" | ");
   try {
-    ingestion.push(await runIngestion("thenewsapi", { limit: limit * 2, query: combinedQuery, publishedAfter }));
+    ingestion.push(await runIngestion("thenewsapi", { limit: limit * 2, publishedAfter }));
   } catch (error) {
     console.error("Ingestion failed:", error);
   }

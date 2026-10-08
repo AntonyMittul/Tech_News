@@ -322,7 +322,7 @@ export function NewsFeed() {
           </div>
         ) : null}
 
-        {hasMore && !savedOnly && !loading && !error ? (
+        {hasMore && !savedOnly && !loading && !error && submittedQuery ? (
           <button
             className="focus-ring mt-8 flex w-full items-center justify-center gap-2 border border-white/10 bg-[var(--panel)]/40 backdrop-blur-md py-4 font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition-all hover:border-[var(--cyan)]/50 hover:bg-[var(--cyan)]/5 hover:text-[var(--cyan)] hover:shadow-[0_0_20px_rgba(0,240,255,0.15)]"
             type="button"

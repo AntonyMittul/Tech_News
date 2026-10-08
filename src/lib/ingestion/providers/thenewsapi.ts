@@ -51,16 +51,17 @@ export const theNewsApiProvider: NewsProvider = {
       throw new Error("THENEWSAPI_API_TOKEN is not configured");
     }
 
-    const search = input.query ?? '("artificial intelligence" | "machine learning" | "data science" | "data scientist" | "software engineering" | cybersecurity | "tech hiring" | "technology hiring" | "software engineer hiring" | "developer hiring" | "AI hiring" | "tech layoffs" | "technology layoffs" | "software layoffs" | "AI layoffs" | "workforce reduction" | "cloud computing" | semiconductor | startup)';
     const params = new URLSearchParams({
       api_token: apiToken,
       categories: "tech",
       language: "en",
       sort: "published_at",
       limit: String(clampLimit(input.limit, 50)),
-      search,
-      search_fields: "title,description,keywords",
     });
+    if (input.query) {
+      params.set("search", input.query);
+      params.set("search_fields", "title,description,keywords");
+    }
     if (input.publishedAfter) {
       params.set("published_after", input.publishedAfter.toISOString().replace(/\.\d{3}Z$/, ""));
     }
