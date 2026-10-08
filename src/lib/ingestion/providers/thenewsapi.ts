@@ -56,7 +56,7 @@ export const theNewsApiProvider: NewsProvider = {
       api_token: apiToken,
       categories: "tech",
       language: "en",
-      sort: "published_on",
+      sort: "published_at",
       limit: String(clampLimit(input.limit, 50)),
       search,
       search_fields: "title,description,keywords",
