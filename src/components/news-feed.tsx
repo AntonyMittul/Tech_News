@@ -12,13 +12,7 @@ import {
   writePreference,
 } from "@/lib/preferences";
 
-type Category = {
-  id: string;
-  name: string;
-  slug: string;
-  sortOrder: number;
-  articleCount: number;
-};
+
 type Article = {
   id: string;
   slug: string;
@@ -73,9 +67,7 @@ function LoadingCards() {
 }
 
 export function NewsFeed() {
-  const [categories, setCategories] = useState<Category[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
-  const [activeCategory, setActiveCategory] = useState("");
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -85,7 +77,6 @@ export function NewsFeed() {
   const [error, setError] = useState<string | null>(null);
   const [readIds, setReadIds] = useState<string[]>([]);
   const [savedArticles, setSavedArticles] = useState<PreferenceArticle[]>([]);
-  const [preferredCategories, setPreferredCategories] = useState<string[]>([]);
   const [hideRead, setHideRead] = useState(false);
   const [savedOnly, setSavedOnly] = useState(false);
 
@@ -118,7 +109,6 @@ export function NewsFeed() {
           page: String(nextPage),
           limit: "10",
         });
-        if (activeCategory) params.set("category", activeCategory);
         if (submittedQuery) params.set("q", submittedQuery);
         const response = await fetch(`/api/articles?${params.toString()}`, {
           cache: "no-store",
@@ -141,21 +131,10 @@ export function NewsFeed() {
         setLoadingMore(false);
       }
     },
-    [activeCategory, submittedQuery],
+    [submittedQuery],
   );
 
-  useEffect(() => {
-    fetch("/api/categories", { cache: "no-store" })
-      .then((response) => response.json())
-      .then((data: { categories: Category[] }) => {
-        const activeCategories = data.categories;
-        setCategories(activeCategories);
-        const allCategorySlugs = activeCategories.map((category) => category.slug);
-        setPreferredCategories(allCategorySlugs);
-        writePreference(preferenceKeys.categories, allCategorySlugs);
-      })
-      .catch(() => setError("Categories could not be loaded."));
-  }, []);
+
 
   useEffect(() => {
     const timer = window.setTimeout(() => void loadArticles(1), 0);
@@ -167,10 +146,7 @@ export function NewsFeed() {
     setSubmittedQuery(query.trim());
   }
 
-  function selectCategory(slug: string) {
-    setActiveCategory(slug);
-    setPage(1);
-  }
+
 
   function setRead(articleId: string) {
     const next = readIds.includes(articleId)
@@ -180,57 +156,14 @@ export function NewsFeed() {
     writePreference(preferenceKeys.read, next);
   }
 
-  const preferredNames = categories
-    .filter((category) => preferredCategories.includes(category.slug))
-    .map((category) => category.name);
-  const visibleCategories = categories.filter(
-    (category) =>
-      preferredCategories.length === 0 ||
-      preferredCategories.includes(category.slug),
-  );
   const visibleArticles = (savedOnly ? savedArticles : articles).filter(
     (article) => {
-      const matchesPreferences =
-        preferredNames.length === 0 ||
-        article.categories.some((category) =>
-          preferredNames.includes(category),
-        );
-      return matchesPreferences && (!hideRead || !readIds.includes(article.id));
+      return !hideRead || !readIds.includes(article.id);
     },
   );
 
   return (
-    <section id="news-feed" className="grid gap-8 lg:grid-cols-[220px_1fr]">
-      <aside>
-        <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">
-          Channels / {visibleCategories.length.toString().padStart(2, "0")}
-        </p>
-        <nav
-          className="flex gap-2 overflow-x-auto pb-2 lg:block lg:space-y-1 lg:overflow-visible"
-          aria-label="News categories"
-        >
-          <button
-            className={`focus-ring shrink-0 border px-3 py-3 text-left text-xs transition lg:w-full ${!activeCategory ? "border-[var(--cyan)]/40 bg-[var(--cyan)]/10 text-[var(--cyan)]" : "border-transparent text-[var(--muted)] hover:border-[var(--line)]"}`}
-            type="button"
-            onClick={() => selectCategory("")}
-          >
-            All live signals
-          </button>
-          {visibleCategories.map((category) => (
-            <button
-              key={category.id}
-              className={`focus-ring shrink-0 border px-3 py-3 text-left text-xs transition lg:w-full ${activeCategory === category.slug ? "border-[var(--cyan)]/40 bg-[var(--cyan)]/10 text-[var(--cyan)]" : "border-transparent text-[var(--muted)] hover:border-[var(--line)]"}`}
-              type="button"
-              onClick={() => selectCategory(category.slug)}
-            >
-              {category.name}
-              <span className="ml-2 font-mono text-[9px] text-[var(--muted)]">
-                {category.articleCount}
-              </span>
-            </button>
-          ))}
-        </nav>
-      </aside>
+    <section id="news-feed" className="grid gap-8">
 
       <div>
         <form className="mb-5 flex gap-2" onSubmit={submitSearch} role="search">

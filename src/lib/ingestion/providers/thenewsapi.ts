@@ -40,8 +40,6 @@ function relevanceScore(title: string, description?: string, source?: string) {
   let score = highSignal.reduce((total, term) => total + (text.includes(term) ? 2 : 0), 0);
   score -= lowSignal.reduce((total, term) => total + (text.includes(term) ? 3 : 0), 0);
   if (trustedSource.some((domain) => source?.toLowerCase().includes(domain))) score += 2;
-  if (titleSignals === 0 && !trustedSource.some((domain) => source?.toLowerCase().includes(domain))) score -= 10;
-  if (/(hiring|layoff|recruit|workforce|headcount|jobs?)/.test(titleText) && technicalTitleSignals === 0) score -= 10;
   return score;
 }
 
