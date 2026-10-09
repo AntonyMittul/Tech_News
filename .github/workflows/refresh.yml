@@ -1,0 +1,17 @@
+name: Hourly Refresh
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Ingestion
+        run: |
+          curl -s -f -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" ${{ secrets.PRODUCTION_URL }}/api/cron/refresh || echo "Ingestion failed, but we continue"
+      - name: Trigger AI Enrichment
+        run: |
+          curl -s -f -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" ${{ secrets.PRODUCTION_URL }}/api/cron/enrich || echo "Enrichment failed, but we continue"

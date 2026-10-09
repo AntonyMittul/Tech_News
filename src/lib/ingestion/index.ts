@@ -111,6 +111,7 @@ export async function runIngestion(providerName: ProviderName, input: FetchArtic
         articlesFetched: items.length,
         articlesInserted: result.inserted,
         articlesSkipped: result.skipped,
+        articlesDuplicated: result.duplicates,
         completedAt: new Date(),
       })
       .where(eq(ingestionRuns.id, run.id));

@@ -177,6 +177,7 @@ export const ingestionRuns = pgTable(
     articlesFetched: integer("articles_fetched").notNull().default(0),
     articlesInserted: integer("articles_inserted").notNull().default(0),
     articlesSkipped: integer("articles_skipped").notNull().default(0),
+    articlesDuplicated: integer("articles_duplicated").notNull().default(0),
     errorMessage: text("error_message"),
     startedAt: timestamp("started_at", { withTimezone: true }).defaultNow().notNull(),
     completedAt: timestamp("completed_at", { withTimezone: true }),

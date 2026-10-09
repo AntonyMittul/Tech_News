@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { Search, ExternalLink, CircleAlert, Inbox, Loader2 } from "lucide-react";
 
@@ -79,6 +79,7 @@ export function NewsFeed() {
   const [savedArticles, setSavedArticles] = useState<PreferenceArticle[]>([]);
   const [hideRead, setHideRead] = useState(false);
   const [savedOnly, setSavedOnly] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const sync = () => {
@@ -101,34 +102,48 @@ export function NewsFeed() {
 
   const loadArticles = useCallback(
     async (nextPage: number, append = false) => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       if (append) setLoadingMore(true);
       else setLoading(true);
       setError(null);
+      
       try {
         const params = new URLSearchParams({
           page: String(nextPage),
           limit: "10",
         });
         if (submittedQuery) params.set("q", submittedQuery);
+        
         const response = await fetch(`/api/articles?${params.toString()}`, {
           cache: "no-store",
+          signal: controller.signal,
         });
+        
         if (!response.ok) throw new Error("The live feed could not be loaded.");
         const data = (await response.json()) as ArticlesResponse;
+        
         setArticles((current) =>
           append ? [...current, ...data.articles] : data.articles,
         );
         setPage(data.page);
         setHasMore(data.hasMore);
-      } catch (cause) {
+      } catch (cause: any) {
+        if (cause.name === "AbortError") return;
         setError(
           cause instanceof Error
             ? cause.message
             : "The live feed could not be loaded.",
         );
       } finally {
-        setLoading(false);
-        setLoadingMore(false);
+        if (abortControllerRef.current === controller) {
+          setLoading(false);
+          setLoadingMore(false);
+        }
       }
     },
     [submittedQuery],

@@ -10,7 +10,7 @@ async function test() {
     api_token: apiToken!,
     categories: "tech",
     language: "en",
-    sort: "published_on",
+    sort: "published_at",
     limit: "10",
     search,
     search_fields: "title,description,keywords",
@@ -20,7 +20,7 @@ async function test() {
   const publishedAfter = new Date(Date.now() - 48 * 60 * 60 * 1000); // 48 hours ago
   params.set("published_after", publishedAfter.toISOString().replace(/\.\d{3}Z$/, ""));
 
-  const url = `https://api.thenewsapi.com/v1/news/top?${params}`;
+  const url = `https://api.thenewsapi.com/v1/news/all?${params}`;
   console.log("Calling URL (with token hidden):", url.replace(apiToken!, "HIDDEN"));
   
   try {

@@ -17,11 +17,6 @@ function readableArticleFilter() {
     AND ${articles.title} NOT ILIKE '%review%'
     AND ${articles.title} NOT ILIKE '%sponsored%'
     AND ${articles.title} NOT ILIKE '%discount%'
-    AND (
-      (${articleSummaries.summary} IS NOT NULL AND length(trim(${articleSummaries.summary})) >= 100 AND ${articleSummaries.summary} NOT LIKE '%...%' AND ${articleSummaries.summary} NOT LIKE '%…%')
-      OR (${articles.description} IS NOT NULL AND length(trim(${articles.description})) >= 100 AND ${articles.description} NOT LIKE '%...%' AND ${articles.description} NOT LIKE '%…%')
-      OR (${articles.contentExcerpt} IS NOT NULL AND length(trim(${articles.contentExcerpt})) >= 100 AND ${articles.contentExcerpt} NOT LIKE '%...%' AND ${articles.contentExcerpt} NOT LIKE '%…%')
-    )
   )`;
 }
 
@@ -70,7 +65,7 @@ export async function getArticles(input: ArticleQuery = {}) {
     .limit(limit + 1)
     .offset((page - 1) * limit);
 
-  const visibleRows = rows.filter((article) => isUsefulHeadline(article.title)).slice(0, limit);
+  const visibleRows = rows.slice(0, limit);
   const categoryRows = visibleRows.length
     ? await db
         .select({ articleId: articleCategories.articleId, name: categories.name })
@@ -162,7 +157,6 @@ export async function getArticleBySlug(slug: string) {
     .limit(1);
 
   if (!article) return undefined;
-  if (!isUsefulHeadline(article.title)) return undefined;
 
   const [categoryRows, tagRows] = await Promise.all([
     db
@@ -211,7 +205,7 @@ export async function getArticleBySlug(slug: string) {
     whyItMatters: decodeHtmlEntities(article.whyItMatters),
     categories: categoryRows,
     tags: tagRows,
-    related: related.filter((item) => isUsefulHeadline(item.title)).map((item) => ({ ...item, title: decodeHtmlEntities(item.title) ?? item.title })),
+    related: related.map((item) => ({ ...item, title: decodeHtmlEntities(item.title) ?? item.title })),
   };
 }
 
@@ -240,7 +234,6 @@ export async function getCategories() {
 
   const articleCounts = new Map<string, number>();
   for (const article of articleRows) {
-    if (!isUsefulHeadline(article.title)) continue;
     articleCounts.set(article.categoryId, (articleCounts.get(article.categoryId) ?? 0) + 1);
   }
 

@@ -25,6 +25,5 @@ export async function refreshLiveNews() {
   }
 
 
-  const enrichment = await enrichPendingArticles(Number(process.env.ENRICHMENT_LIMIT ?? "5"));
-  return { ingestion, enrichment };
+  return { ingestion };
 }

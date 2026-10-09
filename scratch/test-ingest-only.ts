@@ -17,11 +17,10 @@ async function test() {
   const publishedAfter = new Date(Date.now() - lookbackHours * 60 * 60 * 1000);
   const limit = Number(process.env.INGESTION_LIMIT ?? "10");
 
-  const combinedQuery = focusedQueries.join(" | ");
-  console.log("Running ingestion with combined query:", combinedQuery);
+  console.log("Running unconstrained ingestion");
 
   try {
-    const result = await runIngestion("thenewsapi", { limit: limit * 2, query: combinedQuery, publishedAfter });
+    const result = await runIngestion("thenewsapi", { limit: limit * 2, publishedAfter });
     console.log("Ingestion result:", result);
   } catch (error) {
     console.error("Ingestion failed:", error);
