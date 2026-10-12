@@ -17,13 +17,24 @@ export async function refreshLiveNews() {
   const limit = Number(process.env.INGESTION_LIMIT ?? "10");
   const ingestion = [];
 
-  const combinedQuery = focusedQueries.join(" | ");
+  // 1. Ingest from Hacker News (Free public API, zero authentication required, always live)
   try {
-    ingestion.push(await runIngestion("thenewsapi", { limit: limit * 2, publishedAfter }));
+    ingestion.push(await runIngestion("hacker-news", { limit }));
   } catch (error) {
-    console.error("Ingestion failed:", error);
+    console.error("Hacker News ingestion failed:", error);
   }
 
+  // 2. Ingest from TheNewsAPI (If token is available)
+  const thenewsapiToken = process.env.THENEWSAPI_API_TOKEN ?? process.env.THENEWSAPI_TOKEN;
+  if (thenewsapiToken) {
+    try {
+      ingestion.push(await runIngestion("thenewsapi", { limit: limit * 2, publishedAfter }));
+    } catch (error) {
+      console.error("TheNewsAPI ingestion failed:", error);
+    }
+  } else {
+    console.warn("THENEWSAPI_API_TOKEN is not configured; skipped thenewsapi provider.");
+  }
 
   return { ingestion };
 }
