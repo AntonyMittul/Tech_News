@@ -1,11 +1,15 @@
 import { NextRequest } from "next/server";
 
 import { getArticles } from "@/lib/news";
+import { triggerAutoRefreshIfStale } from "@/lib/refresh";
 
 export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
   try {
+    // Non-blocking background check: if last ingestion was > 3 hours ago, refresh in background
+    void triggerAutoRefreshIfStale();
+
     const params = request.nextUrl.searchParams;
     
     let page = Number(params.get("page") ?? "1");
@@ -23,7 +27,11 @@ export async function GET(request: NextRequest) {
       source: params.get("source") ?? undefined,
     });
 
-    return Response.json(result);
+    return Response.json(result, {
+      headers: {
+        "Cache-Control": "no-store, max-age=0, must-revalidate",
+      },
+    });
   } catch (error) {
     console.error("Articles API Error:", error);
     return Response.json({ error: "Internal Server Error" }, { status: 500 });

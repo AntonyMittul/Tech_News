@@ -2,7 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { Search, ExternalLink, CircleAlert, Inbox, Loader2 } from "lucide-react";
+import { Search, ExternalLink, CircleAlert, Inbox, Loader2, RefreshCw } from "lucide-react";
 
 import { BookmarkButton } from "@/components/bookmark-button";
 import {
@@ -79,6 +79,8 @@ export function NewsFeed() {
   const [savedArticles, setSavedArticles] = useState<PreferenceArticle[]>([]);
   const [hideRead, setHideRead] = useState(false);
   const [savedOnly, setSavedOnly] = useState(false);
+  const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -152,9 +154,37 @@ export function NewsFeed() {
 
 
   useEffect(() => {
-    const timer = window.setTimeout(() => void loadArticles(1), 0);
+    const timer = window.setTimeout(() => {
+      void loadArticles(1).then(() => setLastSyncedAt(new Date()));
+    }, 0);
     return () => window.clearTimeout(timer);
   }, [loadArticles]);
+
+  // Periodic dynamic polling: re-check for fresh news every 5 minutes and upon window focus
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        void loadArticles(1).then(() => setLastSyncedAt(new Date()));
+      }
+    }, 5 * 60 * 1000);
+
+    const onFocus = () => {
+      void loadArticles(1).then(() => setLastSyncedAt(new Date()));
+    };
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [loadArticles]);
+
+  const handleManualRefresh = async () => {
+    setRefreshing(true);
+    await loadArticles(1);
+    setLastSyncedAt(new Date());
+    setRefreshing(false);
+  };
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -203,18 +233,39 @@ export function NewsFeed() {
           </button>
         </form>
 
-        <div className="mb-4 flex items-center justify-between border-b border-[var(--line)] pb-3">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--line)] pb-3">
           <div className="flex items-center gap-3">
             <span className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--foreground)]">
               Latest signals
             </span>
-            <span className="bg-[var(--cyan)] px-2 py-0.5 font-mono text-[9px] font-bold text-[var(--background)]">
+            <span className="flex items-center gap-1.5 bg-[var(--cyan)] px-2 py-0.5 font-mono text-[9px] font-bold text-[var(--background)]">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--background)] animate-pulse" />
               LIVE
             </span>
+            <span className="hidden sm:inline font-mono text-[10px] text-[var(--muted)]">
+              Auto-syncs every 3h
+            </span>
           </div>
-          <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--muted)]">
-            Newest first
-          </span>
+          <div className="flex items-center gap-3">
+            {lastSyncedAt ? (
+              <span className="hidden md:inline font-mono text-[9px] uppercase tracking-[0.12em] text-[var(--muted)]">
+                Synced {lastSyncedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </span>
+            ) : null}
+            <button
+              type="button"
+              onClick={handleManualRefresh}
+              disabled={loading || refreshing}
+              className="focus-ring flex items-center gap-1.5 border border-white/10 bg-[var(--panel)] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--cyan)] hover:border-[var(--cyan)]/50 hover:bg-[var(--cyan)]/10 transition-colors"
+              title="Check for newly published news"
+            >
+              <RefreshCw className={`w-3 h-3 ${refreshing ? "animate-spin" : ""}`} />
+              <span>{refreshing ? "Syncing..." : "Refresh"}</span>
+            </button>
+            <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--muted)]">
+              Newest first
+            </span>
+          </div>
         </div>
 
         {error ? (
